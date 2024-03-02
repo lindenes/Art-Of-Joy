@@ -16,7 +16,7 @@ lazy val zioLib = Seq(
 
 lazy val root = (project in file("."))
   .settings(
-    name := "Lemyr",
+    name := "Art-Of-Joy",
     libraryDependencies ++= Seq(
       "io.getquill"          %% "quill-jdbc-zio" % "4.8.1",
       "org.postgresql"       %  "postgresql"     % "42.7.1",
