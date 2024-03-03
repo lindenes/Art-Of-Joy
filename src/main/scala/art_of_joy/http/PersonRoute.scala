@@ -1,12 +1,13 @@
 package art_of_joy.http
 
-import art_of_joy.model.http.HttpResponse
-import art_of_joy.model.person.AuthPerson
+import art_of_joy.model.http._
+import art_of_joy.model.person.{AuthPerson, RegPerson}
 import art_of_joy.services.SessionStorageLayer.StorageUser
 import art_of_joy.services.interfaces.{SessionStorageTrait, UserTrait}
 import zio.ZIO
-import zio.http._
-import zio.json._
+import zio.http.*
+import zio.json.*
+import art_of_joy.utils.*
 
 import java.util.{Date, UUID}
 
@@ -25,6 +26,32 @@ object PersonRoute {
           )
         }yield Response.json(users.toJson)
         ).catchAll(err => ZIO.from( Response.badRequest(err.getMessage) ))
+    },
+    Method.PUT / "person" -> handler {(req:Request) =>
+      (
+        for{
+          service <- ZIO.service[UserTrait]
+          body <- req.body.asString
+          regInfo <- ZIO.fromEither(body.fromJson[RegPerson]).mapError(err => new Exception(err))
+          callBack <- regInfo.password match
+            case Some(value) => service.passwordRegistration(regInfo.email, value, regInfo.number)
+            case None => service.emailRegistration(regInfo.email, regInfo.number)
+          sessionID <- ZIO.from(
+            UUID.randomUUID.toString
+          )
+          sessionStorage <- ZIO.service[SessionStorageTrait]
+          _ <- callBack match
+            case Left(value) => sessionStorage.put(sessionID, StorageUser(value, new Date().getTime ) )
+            case Right(value) => ZIO.unit
+        }yield callBack match
+          case Left(value) => Response.json(value.toJson).addHeaders(
+            Headers(
+              Header.Custom("Access-Control-Expose-Headers", "token"),
+              Header.Custom("token", sessionID)
+            )
+          )
+          case Right(value) => Response.json(HttpListStringResponse(false, value).toJson)
+      ).catchAll(err => ZIO.from(Response.error(Status.BadRequest, err.getMessage)))
     },
     Method.POST / "person" -> handler { (req: Request) =>
       (
@@ -45,7 +72,7 @@ object PersonRoute {
           then Response.json(user.head.toJson).addHeaders(
             Headers(
               Header.Custom("Access-Control-Expose-Headers", "token"),
-              Header.Custom("token", "sessionID")
+              Header.Custom("token", sessionID)
             )
           )
           else if user.length > 1

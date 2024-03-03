@@ -9,7 +9,8 @@ trait SessionStorageTrait(ref: Ref[Map[String, StorageUser]]) {
   def put(key: String, data: StorageUser): UIO[Unit]
 
   def updateTime(key: String): ZIO[Scope, Throwable, Unit]
-
+  def setAcceptCode(key: String, code:String): ZIO[Scope, Throwable, Unit]
+  def clearAcceptCode(key: String): ZIO[Scope, Throwable, Unit]
   def clearUser(key: String): UIO[Unit]
 
   def clearUsers(key: List[String]): UIO[Unit]
