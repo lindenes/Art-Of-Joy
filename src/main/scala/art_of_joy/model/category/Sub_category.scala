@@ -1,6 +1,6 @@
-package lemyr.model.category
+package art_of_joy.model.category
 
-import lemyr.model.category.Sub_category
+import art_of_joy.model.category.Sub_category
 import zio.json.*
 
 case class Sub_category(id:Int, name:String, category_id:Int)

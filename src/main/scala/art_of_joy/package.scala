@@ -1,5 +1,5 @@
 import io.getquill.*
 
-package object lemyr {
+package object art_of_joy {
   val ctx = new PostgresZioJdbcContext(SnakeCase)
 }

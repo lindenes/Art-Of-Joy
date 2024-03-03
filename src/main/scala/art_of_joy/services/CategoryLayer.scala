@@ -1,9 +1,9 @@
-package lemyr.services
-import lemyr.ctx
-import lemyr.services.interfaces.CategoryTrait
+package art_of_joy.services
+import art_of_joy.ctx
+import art_of_joy.services.interfaces.CategoryTrait
 import zio.{ZIO, ZLayer}
 import io.getquill.*
-import lemyr.model.category.{Category, CategoryFull, SubCategoryFromClient, Sub_category}
+import art_of_joy.model.category.{Category, CategoryFull, SubCategoryFromClient, Sub_category}
 
 import javax.sql.DataSource
 object CategoryLayer {

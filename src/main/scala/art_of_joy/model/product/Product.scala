@@ -1,4 +1,4 @@
-package lemyr.model.product
+package art_of_joy.model.product
 
 import java.util.Calendar
 

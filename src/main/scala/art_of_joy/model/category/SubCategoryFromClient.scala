@@ -1,4 +1,4 @@
-package lemyr.model.category
+package art_of_joy.model.category
 
 import zio.json._
 

@@ -1,4 +1,4 @@
-package lemyr.model.http
+package art_of_joy.model.http
 
 import zio.json._
 

@@ -1,6 +1,6 @@
-package lemyr.model.person
+package art_of_joy.model.person
 
-import lemyr.model.person.Person
+import art_of_joy.model.person.Person
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 case class Person(surname:String,email:String, number:String, role:Int, firstname:String, middlename:String,  id:Int, password:String)

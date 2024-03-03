@@ -1,7 +1,7 @@
-package lemyr.services.interfaces
+package art_of_joy.services.interfaces
 
 import io.getquill.*
-import lemyr.model.category.{CategoryFull, SubCategoryFromClient}
+import art_of_joy.model.category.{CategoryFull, SubCategoryFromClient}
 import zio.*
 
 import javax.sql.DataSource

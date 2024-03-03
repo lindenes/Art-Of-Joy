@@ -1,12 +1,12 @@
-package lemyr.services
+package art_of_joy.services
 
-import lemyr.services.interfaces.UserTrait
+import art_of_joy.services.interfaces.UserTrait
 import zio.{Scope, ZIO, ZLayer}
 import io.getquill.*
 import javax.sql.DataSource
-import lemyr.ctx
-import lemyr.model.person.Person
-import lemyr.utils._
+import art_of_joy.ctx
+import art_of_joy.model.person.Person
+import art_of_joy.utils._
 object UserLayer {
 
   import ctx._

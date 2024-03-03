@@ -1,6 +1,6 @@
-package lemyr.model.person
+package art_of_joy.model.person
 
-import lemyr.model.person.AuthPerson
+import art_of_joy.model.person.AuthPerson
 import zio.json.*
 
 case class AuthPerson(email:String, password:String)

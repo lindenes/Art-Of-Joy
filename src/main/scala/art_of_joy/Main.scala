@@ -2,13 +2,13 @@ import io.getquill.*
 import io.getquill.jdbczio.Quill.DataSource
 import zio.*
 import com.typesafe.config.*
-import lemyr.config.ApplicationConfig
+import art_of_joy.config.ApplicationConfig
 import zio.config.typesafe.TypesafeConfigProvider
 import zio.http.*
 import zio.http.netty.NettyConfig
-import lemyr.http.Route
-import lemyr.services.interfaces.{CategoryTrait, SessionStorageTrait}
-import lemyr.services.{CategoryLayer, SessionStorageLayer, UserLayer}
+import art_of_joy.http.getRoutes
+import art_of_joy.services.interfaces.{CategoryTrait, SessionStorageTrait}
+import art_of_joy.services.{CategoryLayer, SessionStorageLayer, UserLayer}
 object Main extends ZIOAppDefault{
   
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
@@ -27,7 +27,7 @@ object Main extends ZIOAppDefault{
             _ <- service.clearUsers(inactiveUsers)
           }yield ()
           ).repeat(Schedule.spaced(15.minute)).forkDaemon
-        _ <- Server.install(Route.getRoutes).map(port => println("Сервер запущен " + port)) *> ZIO.never
+        _ <- Server.install(getRoutes).map(port => println("Сервер запущен " + port)) *> ZIO.never
       }yield ExitCode.success
     )
       .provide(

@@ -1,4 +1,4 @@
-package lemyr.config
+package art_of_joy.config
 
 import zio.*
 import zio.http.*

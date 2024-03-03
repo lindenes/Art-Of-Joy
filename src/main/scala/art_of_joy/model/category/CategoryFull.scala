@@ -1,7 +1,7 @@
-package lemyr.model.category
+package art_of_joy.model.category
 
-import lemyr.model.category.{Category, Sub_category}
-import lemyr.model.category.CategoryFull
+import art_of_joy.model.category.{Category, Sub_category}
+import art_of_joy.model.category.CategoryFull
 import zio.json.*
 
 case class CategoryFull(category:Category, subCategory:List[Option[Sub_category]])

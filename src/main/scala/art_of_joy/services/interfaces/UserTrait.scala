@@ -1,6 +1,6 @@
-package lemyr.services.interfaces
+package art_of_joy.services.interfaces
 
-import lemyr.model.person.Person
+import art_of_joy.model.person.Person
 import zio.*
 
 import javax.sql.DataSource

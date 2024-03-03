@@ -1,7 +1,7 @@
-package lemyr.services
+package art_of_joy.services
 
-import lemyr.model.person.Person
-import lemyr.services.interfaces.SessionStorageTrait
+import art_of_joy.model.person.Person
+import art_of_joy.services.interfaces.SessionStorageTrait
 import zio.*
 
 import java.time.*

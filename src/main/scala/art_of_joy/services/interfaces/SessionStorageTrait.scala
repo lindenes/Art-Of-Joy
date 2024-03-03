@@ -1,6 +1,6 @@
-package lemyr.services.interfaces
+package art_of_joy.services.interfaces
 
-import lemyr.services.SessionStorageLayer.StorageUser
+import art_of_joy.services.SessionStorageLayer.StorageUser
 import zio.*
 
 trait SessionStorageTrait(ref: Ref[Map[String, StorageUser]]) {

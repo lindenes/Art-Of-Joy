@@ -1,4 +1,4 @@
-package lemyr.utils
+package art_of_joy.utils
 
 import java.security.MessageDigest
 
