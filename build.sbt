@@ -21,6 +21,6 @@ lazy val root = (project in file("."))
       "io.getquill"          %% "quill-jdbc-zio" % "4.8.1",
       "org.postgresql"       %  "postgresql"     % "42.7.1",
       "org.slf4j"            % "slf4j-api"       % "2.0.9",
-      "ch.qos.logback"       % "logback-classic" % "1.4.14",
+      "ch.qos.logback"       % "logback-classic" % "1.5.2",
     ) ++ zioLib
   )
