@@ -3,7 +3,7 @@ import art_of_joy.ctx
 import art_of_joy.services.interfaces.CategoryTrait
 import zio.{ZIO, ZLayer}
 import io.getquill.*
-import art_of_joy.model.category.{Category, CategoryFull, SubCategoryFromClient, Sub_category}
+import art_of_joy.model.category.{Category, CategoryFull, SubCategoryFromClient, Subcategory}
 
 import javax.sql.DataSource
 object CategoryLayer {
@@ -14,7 +14,7 @@ object CategoryLayer {
         for{
           categoryList <- ctx.run(
             quote {
-              query[Category].leftJoin(query[Sub_category]).on({case (c, sc) => sc.category_id == c.id})
+              query[Category].leftJoin(query[Subcategory]).on({case (c, sc) => sc.category_id == c.id})
             }
           )
           fullCategory <- ZIO.from(
@@ -43,7 +43,7 @@ object CategoryLayer {
         for{
           data <- ctx.run(
             quote{
-              liftQuery(subCategories).foreach(sc => query[Sub_category].insert(_.name -> sc.name, _.category_id -> sc.categoryID))
+              liftQuery(subCategories).foreach(sc => query[Subcategory].insert(_.name -> sc.name, _.category_id -> sc.categoryID))
             }
           )
         }yield data
