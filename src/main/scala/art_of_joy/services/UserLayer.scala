@@ -15,7 +15,7 @@ object UserLayer {
     for {
       user <- ctx.run(
         quote {
-          query[Person].insert(_.number -> lift(number),
+          query[Person].insert(_.phone -> lift(number),
             _.role -> lift(Role.user.ordinal),
             _.email -> lift(email),
             _.password -> lift(Option(password)),
@@ -79,7 +79,7 @@ object UserLayer {
         for {
           user <- ctx.run(
             quote {
-              query[Person].filter(p => p.number == lift(number))
+              query[Person].filter(p => p.phone == lift(number))
             }
           )
         } yield if user.isEmpty

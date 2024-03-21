@@ -2,4 +2,21 @@ package art_of_joy.model.product
 
 import java.util.Calendar
 
-case class Product(id:Int, name:String, description:String, subcategory_id:Int, brand_id:Int, price:BigDecimal, article:Int, created_at:Calendar)
+case class Product(id:Int,
+                   article:String,
+                   title:String,
+                   name:String,
+                   description:String,
+                   price:Double,
+                   subcategory_id:Int,
+                   brand_id:Int,
+                   created_at: Calendar,
+                   article_wb:String,
+                   barcode:String,
+                   material:String,
+                   fragility:Boolean,
+                   product_country:String,
+                   color:String,
+                   height:Double,
+                   width:Double
+                  )

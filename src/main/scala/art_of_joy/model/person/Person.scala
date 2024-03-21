@@ -5,7 +5,7 @@ import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 case class Person(surname:Option[String],
                   email:String,
-                  number:String,
+                  phone:String,
                   role:Int,
                   firstname:Option[String],
                   middlename:Option[String],
