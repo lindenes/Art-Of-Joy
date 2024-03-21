@@ -22,5 +22,7 @@ lazy val root = (project in file("."))
       "org.postgresql"       %  "postgresql"     % "42.7.1",
       "org.slf4j"            % "slf4j-api"       % "2.0.9",
       "ch.qos.logback"       % "logback-classic" % "1.5.2",
+      "javax.mail"           % "javax.mail-api"  % "1.6.2",
+      "com.sun.mail"         % "javax.mail"      % "1.6.2"
     ) ++ zioLib
   )
