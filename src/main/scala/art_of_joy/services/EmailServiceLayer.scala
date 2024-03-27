@@ -15,7 +15,7 @@ object EmailServiceLayer {
     new EmailServiceTrait {
       override def getSmtpConfig: ZIO[Any, Throwable, SmtpConfig] = ZIO.config[SmtpConfig](deriveConfig[SmtpConfig].nested("SmtpConfig"))
 
-      override def sendMessage(title: String, message: String, emailReceiver:String): ZIO[Any, Throwable, Unit] =
+      override def sendMessage(title: String, body: String, emailReceiver:String): ZIO[Any, Throwable, Unit] =
         for{
           config <- getSmtpConfig
           props <- ZIO.from{
@@ -37,8 +37,8 @@ object EmailServiceLayer {
             val message = new MimeMessage(session);
             message.setFrom(new InternetAddress(config.email));
             message.setRecipients(Message.RecipientType.TO, emailReceiver);
-            message.setSubject("Тестовое сообщение");
-            message.setText("Это тестовое сообщение, отправленное через JavaMail.");
+            message.setSubject(title);
+            message.setText(body);
             message
           }
           _ <- ZIO.from(
