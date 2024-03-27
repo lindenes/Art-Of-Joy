@@ -4,6 +4,8 @@ ThisBuild / scalaVersion := "3.4.0"
 
 lazy val zioConfig = "4.0.1"
 lazy val zio = "2.0.21"
+lazy val mail = "1.6.2"
+lazy val exel = "5.2.5"
 lazy val zioLib = Seq(
   "dev.zio" %% "zio"                 % zio,
   "dev.zio" %% "zio-streams"         % zio,
@@ -22,7 +24,9 @@ lazy val root = (project in file("."))
       "org.postgresql"       %  "postgresql"     % "42.7.1",
       "org.slf4j"            % "slf4j-api"       % "2.0.9",
       "ch.qos.logback"       % "logback-classic" % "1.5.2",
-      "javax.mail"           % "javax.mail-api"  % "1.6.2",
-      "com.sun.mail"         % "javax.mail"      % "1.6.2"
+      "javax.mail"           % "javax.mail-api"  %  mail,
+      "com.sun.mail"         % "javax.mail"      %  mail,
+      "org.apache.poi"       % "poi"             %  exel,
+      "org.apache.poi"       % "poi-ooxml"       %  exel
     ) ++ zioLib
   )

@@ -4,7 +4,6 @@ import java.util.Calendar
 
 case class Product(id:Int,
                    article:String,
-                   title:String,
                    name:String,
                    description:String,
                    price:Double,
@@ -18,5 +17,7 @@ case class Product(id:Int,
                    product_country:String,
                    color:String,
                    height:Double,
-                   width:Double
+                   width:Double,
+                   size:String,
+                   ru_size:String
                   )
