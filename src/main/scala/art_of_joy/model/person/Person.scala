@@ -3,14 +3,14 @@ package art_of_joy.model.person
 import art_of_joy.model.person.Person
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
-case class Person(surname:Option[String],
-                  email:String,
-                  phone:String,
+case class Person(surname:Option[String] = None,
+                  email:Option[String] = None,
+                  phone:Option[String] = None,
                   role:Int,
-                  firstname:Option[String],
-                  middlename:Option[String],
+                  firstname:Option[String] = None,
+                  middlename:Option[String] = None,
                   id:Int,
-                  password:Option[String],
+                  password_hash:Option[String] = None,
                   is_confirm_email:Boolean,
                   is_confirm_phone:Boolean
                  )

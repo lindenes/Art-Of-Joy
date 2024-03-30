@@ -1,6 +1,7 @@
 package art_of_joy
 
 import java.security.MessageDigest
+import java.util.Random
 import java.util.regex.Pattern
 package object utils {
 
@@ -19,5 +20,11 @@ package object utils {
     Pattern.compile("^(?=.*[0-9])(?=.*[a-zA-Z]).{8,}$")
       .matcher(password)
       .matches()
-  
+  def generateCode =
+    val chars = "0123456789"
+    val random = new Random()
+    (
+      for (_ <- 1 to 6)
+        yield chars(random.nextInt(chars.length))
+    ).mkString
 }

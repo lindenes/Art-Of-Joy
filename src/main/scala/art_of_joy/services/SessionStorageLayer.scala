@@ -66,6 +66,14 @@ object SessionStorageLayer {
               updatedUser <- ZIO.from(user.copy(acceptCode = None))
               storage <- ref.update(_.updated(key, updatedUser))
             } yield storage
+
+          override def updatePerson(key: String, person: Person): ZIO[Scope, Throwable, Unit] =
+            for{
+              storageUser <- get(key)
+              user <- ZIO.fromOption(storageUser).mapError(err => new Exception("Not found user in storage"))
+              updatedUser <- ZIO.from(user.copy(person = person))
+              storage <- ref.update(_.updated(key, updatedUser))
+            }yield storage
         }
       }
     }

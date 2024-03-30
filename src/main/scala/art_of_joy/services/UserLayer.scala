@@ -1,6 +1,6 @@
 package art_of_joy.services
 
-import art_of_joy.services.interfaces.UserTrait
+import art_of_joy.services.interfaces.{EmailServiceTrait, SessionStorageTrait, UserTrait}
 import zio.{Scope, ZIO, ZLayer}
 import io.getquill.*
 
@@ -8,17 +8,20 @@ import javax.sql.DataSource
 import art_of_joy.ctx
 import art_of_joy.model.`enum`.{RegistrationError, Role}
 import art_of_joy.model.person.{Person, RegPerson}
+import art_of_joy.services.SessionStorageLayer.StorageUser
 import art_of_joy.utils.*
+
+import java.util.{Date, UUID}
 object UserLayer {
   import ctx._
   private def addPerson(email:String, password:String, number:String): ZIO[DataSource, Throwable, Person] =
     for {
       user <- ctx.run(
         quote {
-          query[Person].insert(_.phone -> lift(number),
+          query[Person].insert(_.phone -> lift(Option(number)),
             _.role -> lift(Role.user.ordinal),
-            _.email -> lift(email),
-            _.password -> lift(Option(password)),
+            _.email -> lift(Option(email)),
+            _.password_hash -> lift(Option(password)),
             _.is_confirm_email -> false,
             _.is_confirm_phone -> false
           ).returning(p => p)
@@ -59,7 +62,7 @@ object UserLayer {
         for{
           user <- ctx.run(
             quote{
-              query[Person].filter(p => p.email == lift(email) && p.password.getOrElse("") == lift(passToHash(password)))
+              query[Person].filter(p => p.email == lift(Option(email)) && p.password_hash.getOrElse("") == lift(passToHash(password)))
             }
           )
         }yield user
@@ -68,37 +71,67 @@ object UserLayer {
         for{
           user <- ctx.run(
             quote{
-              query[Person].filter(p => p.email == lift(email) )
+              query[Person].filter(p => p.email == lift(Option(email)) )
             }
           )
-        }yield if user.isEmpty
-          then true
-        else false
+        }yield user.isEmpty
+
 
       override def checkNumber(number: String): ZIO[DataSource, Throwable, Boolean] =
         for {
           user <- ctx.run(
             quote {
-              query[Person].filter(p => p.phone == lift(number))
+              query[Person].filter(p => p.phone == lift(Option(number)))
             }
           )
-        } yield if user.isEmpty
-          then true
-        else false
+        } yield user.isEmpty
 
-      override def passwordRegistration(email: String, password: String, number: String): ZIO[DataSource, Throwable, Either[Person, List[String]]] =
+      override def emailRegistration(email: String): ZIO[SessionStorageTrait & DataSource & EmailServiceTrait, Throwable, Either[String, List[String]]] =
         for{
-          passAndEmailValid <- ZIO.from(isValidPassword(password)) zipPar ZIO.from(isValidEmail(email))
-          checkNumberAndEmail <- checkEmail(email) zipPar checkNumber(number)
-          callBack <- ZIO.ifZIO(checkNumber(number) && checkEmail(email))(
-            onTrue = addPerson(email, passToHash(password), number).map(Left(_)),
-            onFalse = ZIO.from(
-              getRegistrationError(passAndEmailValid._1, passAndEmailValid._2, checkNumberAndEmail._1, checkNumberAndEmail._2)
-            ).map(Right(_))
+          emailValid <- ZIO.from(isValidEmail(email))
+          isEmailBusy <- checkEmail(email)
+          result <- ZIO.ifZIO(ZIO.from(!isEmailBusy))(
+            onTrue =ZIO.from(
+              getRegistrationError(true, emailValid, isEmailBusy, true)
+            ).map(Right(_)),
+            onFalse =
+              (
+                for{
+                  storage <- ZIO.service[SessionStorageTrait]
+                  sessionID <- ZIO.from(
+                    UUID.randomUUID.toString
+                  )
+                  acceptCode <- ZIO.succeed(generateCode)
+                  emailService <- ZIO.service[EmailServiceTrait]
+                  _ <- emailService.sendMessage("Подтверждение почты", s"Ваш код подтверждения $acceptCode", email)
+                  _ <- storage.put(sessionID, StorageUser(
+                    Person(id = -1, role = Role.user.ordinal, is_confirm_email = false, is_confirm_phone = false),
+                    new Date().getTime, Option(acceptCode)
+                  ))
+                }yield sessionID
+              ).map(Left(_))
           )
-        }yield callBack
+        }yield result
 
-      override def emailRegistration(email: String, number: String): ZIO[DataSource, Throwable, Either[Person, List[String]]] = ???
+      override def numberRegistration(number: String): ZIO[SessionStorageTrait, Throwable, Either[String, List[String]]] = ???
+
+      override def addPerson(person: Person): ZIO[DataSource, Throwable, Person] =
+        for {
+          user <- ctx.run(
+            quote {
+              query[Person].insert(
+                _.role -> lift(person.role),
+                _.phone -> lift(person.phone),
+                _.email -> lift(person.email),
+                _.surname -> lift(person.surname),
+                _.firstname -> lift(person.firstname),
+                _.middlename -> lift(person.middlename),
+                _.is_confirm_email -> lift(person.is_confirm_email),
+                _.is_confirm_phone -> lift(person.is_confirm_phone),
+              ).returning(p => p)
+            }
+          )
+        } yield user
     }
   )
 }
