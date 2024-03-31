@@ -45,10 +45,7 @@ object PersonRoute {
                 result <- storage.get(sessionID)
               }yield result match
                 case Some(storagePerson) => Response.json(
-                  s"""
-                     |"acceptCode":"${storagePerson.acceptCode.get}",
-                     |"sessionID":"$sessionID"
-                     |""".stripMargin)
+                  s""" "sessionID":"$sessionID" """)
                 case None => Response.json(HttpResponse(false, "Авторизируйтесь заново").toJson)
             case Right(errorList) => ZIO.from( Response.json(HttpListStringResponse(false, errorList).toJson) )
         }yield response
@@ -59,6 +56,7 @@ object PersonRoute {
         for{
           service <- ZIO.service[SessionStorageTrait]
           token <- ZIO.fromOption(req.headers.find(_.headerName == "token").map(_.renderedValue)).mapError(err => new Exception("token not found"))
+          _ <- service.updateTime(token)
           data <- req.body.asString
           body <- ZIO.from(data.fromJson[Json]).mapError(err => new Exception("Ошибка парсинга "+err))
           acceptCode <- ZIO.from(
