@@ -29,7 +29,7 @@ object PersonRoute {
         }yield Response.json(users.toJson)
         ).catchAll(err => ZIO.from( Response.badRequest(err.getMessage) ))
     },
-    Method.PUT / "registration" -> handler {(req:Request) =>
+    Method.POST / "registration" -> handler {(req:Request) =>
       (
         for{
           service <- ZIO.service[UserTrait]
