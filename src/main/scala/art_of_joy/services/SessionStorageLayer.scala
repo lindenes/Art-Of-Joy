@@ -51,11 +51,11 @@ object SessionStorageLayer {
               inactiveUsers <- checkExpired(users)
             }yield inactiveUsers
 
-          override def setAcceptCode(key: String, code:String): ZIO[Scope, Throwable, Unit] =
+          override def setAcceptCode(key: String, code:Option[String]): ZIO[Scope, Throwable, Unit] =
             for {
               storageUser <- get(key)
               user <- ZIO.fromOption(storageUser).mapError(err => new Exception("Not found user in storage"))
-              updatedUser <- ZIO.from(user.copy(acceptCode = Some(code)))
+              updatedUser <- ZIO.from(user.copy(acceptCode = code))
               storage <- ref.update(_.updated(key, updatedUser))
             } yield storage
 

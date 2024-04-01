@@ -14,11 +14,11 @@ import art_of_joy.utils.*
 import java.util.{Date, UUID}
 object UserLayer {
   import ctx._
-  private def addPerson(email:String, password:String, number:String): ZIO[DataSource, Throwable, Person] =
+  private def addPerson(email:String, password:String, phone:String): ZIO[DataSource, Throwable, Person] =
     for {
       user <- ctx.run(
         quote {
-          query[Person].insert(_.phone -> lift(Option(number)),
+          query[Person].insert(_.phone -> lift(Option(phone)),
             _.role -> lift(Role.user.ordinal),
             _.email -> lift(Option(email)),
             _.password_hash -> lift(Option(password)),
@@ -29,12 +29,12 @@ object UserLayer {
       )
     } yield user
 
-  private def getRegistrationError(passwordValid:Boolean, emailValid:Boolean, emailChecker:Boolean,numberChecker:Boolean) =
+  private def getRegistrationError(passwordValid:Boolean, emailValid:Boolean, emailChecker:Boolean,phoneChecker:Boolean) =
     List(
       (passwordValid, RegistrationError.passwordValidationError),
       (emailValid, RegistrationError.emailValidationError),
       (emailChecker, RegistrationError.emailCheckerError),
-      (numberChecker, RegistrationError.numberCheckerError)
+      (phoneChecker, RegistrationError.phoneCheckerError)
     ).collect{ case (false, msg) => msg.message}
 
   val live = ZLayer.succeed(
@@ -58,6 +58,17 @@ object UserLayer {
             )
         }yield users
 
+      override def getPersonByEmail(email:String): ZIO[DataSource, Throwable, List[Person]] =
+        for{
+          user <- ctx.run(
+            quote{
+              query[Person].filter(p => 
+                p.email == lift(Option(email))
+              )
+            }
+          )
+        }yield user
+
       override def authUser(email: String, password: String): ZIO[DataSource, Throwable, List[Person]] =
         for{
           user <- ctx.run(
@@ -77,11 +88,11 @@ object UserLayer {
         }yield user.isEmpty
 
 
-      override def checkNumber(number: String): ZIO[DataSource, Throwable, Boolean] =
+      override def checkPhone(phone: String): ZIO[DataSource, Throwable, Boolean] =
         for {
           user <- ctx.run(
             quote {
-              query[Person].filter(p => p.phone == lift(Option(number)))
+              query[Person].filter(p => p.phone == lift(Option(phone)))
             }
           )
         } yield user.isEmpty
@@ -113,7 +124,7 @@ object UserLayer {
           )
         }yield result
 
-      override def numberRegistration(number: String): ZIO[SessionStorageTrait, Throwable, Either[String, List[String]]] = ???
+      override def phoneRegistration(phone: String): ZIO[SessionStorageTrait, Throwable, Either[String, List[String]]] = ???
 
       override def addPerson(person: Person): ZIO[DataSource, Throwable, Person] =
         for {
@@ -132,6 +143,19 @@ object UserLayer {
             }
           )
         } yield user
+
+      override def authUserOnEmail(email: String): ZIO[DataSource & SessionStorageTrait, Throwable, String] =
+        for{
+          isRegistration <- checkEmail(email)
+          _ <- ZIO.when(isRegistration)(ZIO.fail(new Exception("Пользователь с такой почтой не зарегистрирован")))
+          service <- ZIO.service[SessionStorageTrait]
+          token <- ZIO.from(
+            UUID.randomUUID.toString
+          )
+          _ <- service.put(token, StorageUser(
+            Person(email = Option(email)), new Date().getTime, Option(generateCode)
+          ))
+        }yield token
     }
   )
 }

@@ -6,13 +6,13 @@ import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 case class Person(surname:Option[String] = None,
                   email:Option[String] = None,
                   phone:Option[String] = None,
-                  role:Int,
+                  role:Int = 2,
                   firstname:Option[String] = None,
                   middlename:Option[String] = None,
-                  id:Int,
+                  id:Int = -1,
                   password_hash:Option[String] = None,
-                  is_confirm_email:Boolean,
-                  is_confirm_phone:Boolean
+                  is_confirm_email:Boolean = false,
+                  is_confirm_phone:Boolean = false
                  )
 
 object Person{
