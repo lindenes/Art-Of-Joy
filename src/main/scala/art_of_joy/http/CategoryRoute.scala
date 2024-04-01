@@ -25,7 +25,7 @@ object CategoryRoute {
           )
           service <- ZIO.service[CategoryTrait]
           _ <- service.addCategory(names)
-        }yield Response.json(HttpResponse(message = "Успешно").toJson)
+        }yield Response.json(HttpResponse(message = List("Успешно")).toJson)
         ).catchAll(err => ZIO.from(Response.error(Status.BadRequest, err.getMessage)))
     },
     Method.PUT / "subCategory" -> handler{ (req:Request) =>
@@ -38,7 +38,7 @@ object CategoryRoute {
           data <- req.body.asString
           subCategoryList <- ZIO.fromEither(data.fromJson[List[SubCategoryFromClient]]).mapError(err => new Exception(err))
           _ <- service.addSubCategory(subCategoryList)
-        }yield Response.json(HttpResponse(message = "Успешно").toJson)
+        }yield Response.json(HttpResponse(message = List("Успешно")).toJson)
         ).catchAll(err => ZIO.from(Response.error(Status.BadRequest, err.getMessage)))
     },
     Method.GET / "category" -> Handler.fromZIO(

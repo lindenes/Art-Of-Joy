@@ -8,7 +8,7 @@ import zio.http.*
 import zio.http.netty.NettyConfig
 import art_of_joy.http.getRoutes
 import art_of_joy.services.interfaces.{CategoryTrait, SessionStorageTrait}
-import art_of_joy.services.{CategoryLayer, EmailServiceLayer, ExelLayer, SessionStorageLayer, UserLayer}
+import art_of_joy.services._
 object Main extends ZIOAppDefault{
   
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
@@ -23,8 +23,8 @@ object Main extends ZIOAppDefault{
         _ <- (
           for{
             service <- ZIO.service[SessionStorageTrait]
-            inactiveUsers <- service.checkInactiveUsers
-            _ <- service.clearUsers(inactiveUsers)
+            inactiveUsers <- service.checkInactivePersons
+            _ <- service.clearPersons(inactiveUsers)
           }yield ()
           ).repeat(Schedule.spaced(15.minute)).forkDaemon
         _ <- Server.install(getRoutes).map(port => println("Сервер запущен " + port)) *> ZIO.never
@@ -36,7 +36,7 @@ object Main extends ZIOAppDefault{
         ApplicationConfig.getHttpConfig,
         ApplicationConfig.getNettyConfig,
         DataSource.fromPrefix("db"),
-        UserLayer.live,
+        PersonLayer.live,
         CategoryLayer.live,
         SessionStorageLayer.live,
         EmailServiceLayer.live,
