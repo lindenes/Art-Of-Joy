@@ -1,12 +1,13 @@
 package art_of_joy.model.person
 
+import art_of_joy.model.`enum`.Role
 import art_of_joy.model.person.Person
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 case class Person(surname:Option[String] = None,
                   email:Option[String] = None,
                   phone:Option[String] = None,
-                  role:Int = 2,
+                  role:Int = Role.user.ordinal,
                   firstname:Option[String] = None,
                   middlename:Option[String] = None,
                   id:Int = -1,

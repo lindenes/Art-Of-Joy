@@ -3,7 +3,7 @@ import art_of_joy.ctx
 import art_of_joy.services.interfaces.CategoryTrait
 import zio.{ZIO, ZLayer}
 import io.getquill.*
-import art_of_joy.model.category.{Category, CategoryFull, SubCategoryFromClient, Subcategory}
+import art_of_joy.model.category.{Brand, Category, CategoryFull, SubCategoryFromClient, Subcategory}
 
 import javax.sql.DataSource
 object CategoryLayer {
@@ -47,6 +47,11 @@ object CategoryLayer {
             }
           )
         }yield data
+
+      override def getBrandList: ZIO[DataSource, Throwable, List[Brand]] =
+        ctx.run(
+          quote{query[Brand]}
+        )
     }
   )
 }

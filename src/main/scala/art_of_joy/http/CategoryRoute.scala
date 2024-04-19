@@ -46,6 +46,12 @@ object CategoryRoute {
         services <- ZIO.service[CategoryTrait]
         category <- services.getFullCategoryList
       }yield Response.json(category.toJson)
+    ),
+    Method.GET / "brand" -> Handler.fromZIO(
+      for{
+        services <- ZIO.service[CategoryTrait]
+        brand <- services.getBrandList
+      }yield Response.json(brand.toJson)
     )
   ).sandbox.toHttpApp
 }

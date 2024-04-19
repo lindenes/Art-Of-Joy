@@ -1,6 +1,7 @@
 package art_of_joy.http
 
-import art_of_joy.services.interfaces.ExelTrait
+import art_of_joy.model.product.ProductClientFilter
+import art_of_joy.services.interfaces.{ExelTrait, ProductTrait}
 import zio.ZIO
 import zio.http.*
 import zio.json.*
@@ -15,6 +16,16 @@ object ProductRoute {
           service <- ZIO.service[ExelTrait]
           exelProduct <- service.getProductFromExel(arrayByte)
         }yield Response.json(exelProduct.toJson)
+      ).catchAll(err => ZIO.from(Response.text(err.getMessage)))
+    },
+    Method.POST / "product" -> handler {(req:Request) =>
+      (
+        for{
+          body <- req.body.asString
+          filter <- ZIO.fromEither(body.fromJson[ProductClientFilter]).mapError(err => new Exception("Ошибка парсинга" + err))
+          service <- ZIO.service[ProductTrait]
+          product <- service.getProductList(filter)
+        }yield Response.json(product.toJson)
       ).catchAll(err => ZIO.from(Response.text(err.getMessage)))
     }
   ).sandbox.toHttpApp

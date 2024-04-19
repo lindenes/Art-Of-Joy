@@ -27,7 +27,7 @@ object PersonRoute {
             req.url.queryParams.get("endRow").map(_.toInt)
           )
         }yield Response.json(users.toJson)
-        ).catchAll(err => ZIO.from( Response.badRequest(err.getMessage) ))
+        ).catchAll(err => ZIO.from( Response.json(HttpResponse(false, List(err.getMessage)).toJson) ))
     },
     Method.POST / "registration" -> handler {(req:Request) =>
       (

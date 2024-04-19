@@ -7,8 +7,9 @@ import zio.config.typesafe.TypesafeConfigProvider
 import zio.http.*
 import zio.http.netty.NettyConfig
 import art_of_joy.http.getRoutes
+import art_of_joy.services
 import art_of_joy.services.interfaces.{CategoryTrait, SessionStorageTrait}
-import art_of_joy.services._
+import art_of_joy.services.*
 object Main extends ZIOAppDefault{
   
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
@@ -40,7 +41,8 @@ object Main extends ZIOAppDefault{
         CategoryLayer.live,
         SessionStorageLayer.live,
         EmailServiceLayer.live,
-        ExelLayer.live
+        ExelLayer.live,
+        ProductLayer.live
       )
 }
 
