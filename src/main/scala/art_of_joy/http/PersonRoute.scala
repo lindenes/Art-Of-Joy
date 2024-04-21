@@ -46,7 +46,7 @@ object PersonRoute {
                 result <- storage.get(sessionID)
               }yield result match
                 case Some(storagePerson) => Response.json(
-                  s""" "token":"$sessionID" """)
+                  s"""{"token":"$sessionID"}""")
                 case None => Response.json(HttpResponse(false, List("Авторизируйтесь заново")).toJson)
             case Right(errorList) => ZIO.from( Response.json(HttpValidationResponse(false, errorList).toJson) )
         }yield response
@@ -115,7 +115,7 @@ object PersonRoute {
                 token <- service.authUserOnEmail(email)
                 result <- ZIO.from(
                   Response.json(
-                    s""" "token":"$token" """)
+                    s"""{"token":"$token"}""")
                 )
               }yield result
             case AuthType.phoneAuth => ZIO.from(Response.text("ага щас нет такого входа еще"))
