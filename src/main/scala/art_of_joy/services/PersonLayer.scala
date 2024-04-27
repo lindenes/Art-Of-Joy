@@ -122,7 +122,7 @@ object PersonLayer {
                   emailService <- ZIO.service[EmailServiceTrait]
                   _ <- emailService.sendMessage("Подтверждение почты", s"Ваш код подтверждения $acceptCode", email)
                   _ <- storage.put(sessionID, StoragePerson(
-                    Person(id = -1, role = Role.user.ordinal, is_confirm_email = false, is_confirm_phone = false),
+                    Person(id = -1, email = Option(email), role = Role.user.ordinal, is_confirm_email = false, is_confirm_phone = false),
                     new Date().getTime, Option(acceptCode)
                   ))
                 }yield sessionID
