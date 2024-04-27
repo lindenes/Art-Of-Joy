@@ -30,5 +30,5 @@ package object utils {
       for (_ <- 1 to 6)
         yield chars(random.nextInt(chars.length))
     ).mkString
-  def getToken(req:Request): ZIO[Any, Exception, String] = ZIO.fromOption(req.headers.find(_.headerName == "token").map(_.renderedValue)).mapError(err => new Exception("token not found"))
+  def getToken(req:Request): ZIO[Any, Exception, String] = ZIO.fromOption(req.headers.find(_.headerName == "Token").map(_.renderedValue)).mapError(err => new Exception("token not found"))
 }
