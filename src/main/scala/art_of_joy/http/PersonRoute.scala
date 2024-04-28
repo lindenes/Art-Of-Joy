@@ -76,7 +76,11 @@ object PersonRoute {
                             response <- ZIO.from(Response.json(person.toJson))
                           }yield response
                         else
-                          ZIO.from(Response.json(HttpResponse(false, List("Неверный код подтверждения")).toJson))
+                          ZIO.from(Response.json(
+                            HttpValidationResponse(false, List(
+                              HttpValidationFields("acceptCode", "Неверный код подтверждения")
+                            )).toJson
+                          ))
                   }yield response
                 case AcceptCodeType.authorization =>
                   for{
