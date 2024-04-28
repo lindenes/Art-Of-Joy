@@ -27,7 +27,7 @@ object PersonRoute {
             req.url.queryParams.get("endRow").map(_.toInt)
           )
         }yield Response.json(users.toJson)
-        ).catchAll(err => ZIO.from( Response.json(HttpResponse(false, List(err.getMessage)).toJson) ))
+        ).catchAll(err => ZIO.from( Response.json(HttpResponse(false, err.getMessage).toJson) ))
     },
     Method.POST / "registration" -> handler {(req:Request) =>
       (
@@ -47,10 +47,10 @@ object PersonRoute {
               }yield result match
                 case Some(storagePerson) => Response.json(
                   s"""{"token":"$sessionID"}""")
-                case None => Response.json(HttpResponse(false, List("Авторизируйтесь заново")).toJson)
+                case None => Response.json(HttpResponse(false, "Авторизируйтесь заново").toJson)
             case Right(errorList) => ZIO.from( Response.json(HttpValidationResponse(false, errorList).toJson) )
         }yield response
-      ).catchAll(err => ZIO.from(Response.json(HttpResponse(false, List(err.getMessage)).toJson)))
+      ).catchAll(err => ZIO.from(Response.json(HttpResponse(false, err.getMessage).toJson)))
     },
     Method.POST / "acceptCode" -> handler {(req:Request) =>
       (
@@ -90,9 +90,9 @@ object PersonRoute {
                     _ <- ZIO.when(person.length > 1)(ZIO.fail(new Exception("С такой почтой несколько пользователей")))
                     response <- ZIO.from(Response.json(person.head.toJson))
                   }yield response
-            case None => ZIO.from(Response.json(HttpResponse(false, List("Авторизируйтесь заново")).toJson))
+            case None => ZIO.from(Response.json(HttpResponse(false, "Авторизируйтесь заново").toJson))
         }yield response
-      ).catchAll(err => ZIO.from(Response.json(HttpResponse(false, List(err.getMessage)).toJson)))
+      ).catchAll(err => ZIO.from(Response.json(HttpResponse(false, err.getMessage).toJson)))
     },
     Method.POST / "authorization" -> handler { (req: Request) =>
       (
@@ -122,7 +122,7 @@ object PersonRoute {
               }yield result
             case AuthType.phoneAuth => ZIO.from(Response.text("ага щас нет такого входа еще"))
         } yield response
-      ).catchAll(err => ZIO.from( Response.json(HttpResponse(false, List(err.getMessage)).toJson) ))
+      ).catchAll(err => ZIO.from( Response.json(HttpResponse(false, err.getMessage).toJson) ))
     },
     Method.POST / "password" -> handler { (req:Request) =>
       (
@@ -135,7 +135,7 @@ object PersonRoute {
           userService <- ZIO.service[PersonTrait]
           response <- ZIO.from(Response.text(""))
         }yield response
-        ).catchAll(ex =>  ZIO.from( Response.json(HttpResponse(false, List(ex.getMessage)).toJson)))
+        ).catchAll(ex =>  ZIO.from( Response.json(HttpResponse(false, ex.getMessage).toJson)))
     },
     Method.POST / "personInfo" -> handler { (req:Request) =>
       (
@@ -155,13 +155,13 @@ object PersonRoute {
           )
           response <- if updatedRows >= 1
             then ZIO.from(
-              Response.json(HttpResponse(true, List("Данные обновлены")).toJson)
+              Response.json(HttpResponse(true, "Данные обновлены").toJson)
             )
           else ZIO.from(
-            Response.json(HttpResponse(false, List("Не получилось найти нужного пользователя")).toJson)
+            Response.json(HttpResponse(false, "Не получилось найти нужного пользователя").toJson)
           )
         }yield response
-      ).catchAll(ex =>  ZIO.from( Response.json(HttpResponse(false, List(ex.getMessage)).toJson)))
+      ).catchAll(ex =>  ZIO.from( Response.json(HttpResponse(false, ex.getMessage).toJson)))
     }
   ).sandbox.toHttpApp
 }
