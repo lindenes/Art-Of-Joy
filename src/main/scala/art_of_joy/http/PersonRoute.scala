@@ -1,8 +1,8 @@
 package art_of_joy.http
 
-import art_of_joy.model.`enum`.{AcceptCodeType, AuthType, RegistrationError}
+import art_of_joy.model.`enum`._
 import art_of_joy.model.http.*
-import art_of_joy.model.person.{AcceptCode, AuthPerson, SetPassword, RegPerson}
+import art_of_joy.model.person._
 import art_of_joy.services.SessionStorageLayer.StoragePerson
 import art_of_joy.services.interfaces.{PersonTrait, SessionStorageTrait}
 import zio.ZIO
@@ -67,7 +67,7 @@ object PersonRoute {
                 case AcceptCodeType.registration =>
                   for{
                     userService <- ZIO.service[PersonTrait]
-                    response <- 
+                    response <-
                         if (value.acceptCode == body.acceptCode)
                           for{
                             userService <- ZIO.service[PersonTrait]
@@ -110,7 +110,7 @@ object PersonRoute {
             case AuthType.emailAuth =>
               for{
                 email <- ZIO.fromOption(data.email).mapError(err => new Exception("Не ввели почту"))
-                token <- service.authUserOnEmail(email)
+                token <- service.authPersonOnEmail(email)
                 result <- ZIO.from(
                   Response.json(
                     s"""{"token":"$token"}""")
@@ -119,19 +119,45 @@ object PersonRoute {
             case AuthType.phoneAuth => ZIO.from(Response.text("ага щас нет такого входа еще"))
         } yield response
       ).catchAll(err => ZIO.from( Response.json(HttpResponse(false, List(err.getMessage)).toJson) ))
+    },
+    Method.POST / "password" -> handler { (req:Request) =>
+      (
+        for{
+          storage <- ZIO.service[SessionStorageTrait]
+          token <- getToken(req)
+          _ <- storage.updateTime(token)
+          body <- req.body.asString
+          password <- ZIO.from(body.fromJson[SetPassword]).mapError(err => new Exception("Ошибка парсинга " + err))
+          userService <- ZIO.service[PersonTrait]
+          response <- ZIO.from(Response.text(""))
+        }yield response
+        ).catchAll(ex =>  ZIO.from( Response.json(HttpResponse(false, List(ex.getMessage)).toJson)))
+    },
+    Method.POST / "personInfo" -> handler { (req:Request) =>
+      (
+        for{
+          storage <- ZIO.service[SessionStorageTrait]
+          token <- getToken(req)
+          _ <- storage.updateTime(token)
+          body <- req.body.asString
+          updatePersonInfo <- ZIO.from(body.fromJson[UpdatePersonInfo]).mapError(err => new Exception("Ошибка парсинга " + err))
+          currentPerson <- storage.get(token).flatMap(ZIO.fromOption(_)).mapError(err => new Exception("Авторизируйтесь заново"))
+          personStorage <- ZIO.service[PersonTrait]
+          updatedRows <- personStorage.setPersonInfo(
+            currentPerson.person.id,
+            updatePersonInfo.surname,
+            updatePersonInfo.firstname,
+            updatePersonInfo.middlename
+          )
+          response <- if updatedRows >= 1
+            then ZIO.from(
+              Response.json(HttpResponse(true, List("Данные обновлены")).toJson)
+            )
+          else ZIO.from(
+            Response.json(HttpResponse(false, List("Не получилось найти нужного пользователя")).toJson)
+          )
+        }yield response
+      ).catchAll(ex =>  ZIO.from( Response.json(HttpResponse(false, List(ex.getMessage)).toJson)))
     }
   ).sandbox.toHttpApp
-  Method.POST / "password" -> handler { (req:Request) =>
-    (
-      for{
-        storage <- ZIO.service[SessionStorageTrait]
-        token <- getToken(req)
-        _ <- storage.updateTime(token)
-        body <- req.body.asString
-        password <- ZIO.from(body.fromJson[SetPassword]).mapError(err => new Exception("Ошибка парсинга " + err))
-        userService <- ZIO.service[PersonTrait]
-        response <- ZIO.from(Response.text(""))
-      }yield response
-    ).catchAll(ex =>  ZIO.from( Response.json(HttpResponse(false, List(ex.getMessage)).toJson)))
-  }
 }

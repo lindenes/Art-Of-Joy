@@ -150,7 +150,7 @@ object PersonLayer {
           )
         } yield user
 
-      override def authUserOnEmail(email: String): ZIO[DataSource & SessionStorageTrait, Throwable, String] =
+      override def authPersonOnEmail(email: String): ZIO[DataSource & SessionStorageTrait, Throwable, String] =
         for{
           isRegistration <- checkEmail(email)
           _ <- ZIO.when(isRegistration)(ZIO.fail(new Exception("Пользователь с такой почтой не зарегистрирован")))
@@ -164,6 +164,21 @@ object PersonLayer {
         }yield token
 
       override def setPassword(personID:Int, password: SetPassword): ZIO[DataSource, Throwable, HttpResponse] = ???
+
+      override def setPersonInfo(id:Long, surname:String, firstname:String, middleName:Option[String]): ZIO[DataSource, Throwable, Long] =
+        ctx.run(
+          dynamicQuery[Person]
+            .filter(_.id == lift(id))
+            .update(
+              setValue(_.firstname, Option(firstname)),
+              setValue(_.surname, Option(surname)),
+              setOpt(_.middlename, middleName match
+                case Some(value) => Option(Option(value))
+                case None => Option.empty[Option[String]]
+              )
+            )
+        )
+
     }
   )
 }
