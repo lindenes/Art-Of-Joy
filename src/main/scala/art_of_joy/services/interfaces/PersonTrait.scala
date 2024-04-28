@@ -15,6 +15,7 @@ trait PersonTrait {
   def addPerson(person: Person):ZIO[DataSource, Throwable, Person]
   def emailRegistration(email:String):ZIO[SessionStorageTrait & DataSource & EmailServiceTrait,Throwable,Either[String, List[HttpValidationFields]]]
   def phoneRegistration(phone:String):ZIO[SessionStorageTrait & DataSource,Throwable,Either[String, List[HttpValidationFields]]]
-  def setPassword(personID:Int, password:SetPassword):ZIO[DataSource, Throwable, HttpResponse]
+  def setPassword(personID:Int, newPassword:String, repeatPassword:String):ZIO[DataSource, Throwable, Either[Long, List[HttpValidationFields]]]
+  def updatePassword(personID:Int, newPassword:String, repeatPassword:String, oldPassword:String):ZIO[DataSource, Throwable, Either[Long, List[HttpValidationFields]]]
   def setPersonInfo(id:Long, surName:String, firstName:String, middleName:Option[String]):ZIO[DataSource, Throwable, Long]
 }

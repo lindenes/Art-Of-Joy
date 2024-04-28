@@ -106,10 +106,19 @@ object PersonRoute {
               for{
                 email <- ZIO.fromOption(data.email).mapError(err => new Exception("Не ввели почту"))
                 password <- ZIO.fromOption(data.password).mapError(err => new Exception("Не ввели пароль"))
-                _ <- ZIO.when(isValidPassword(password))(ZIO.fail(new Exception(RegistrationError.passwordValidationError.message)))
-                _ <- ZIO.when(isValidEmail(email))(ZIO.fail(new Exception(RegistrationError.emailValidationError.message)))
+                _ <- ZIO.when(!isValidPassword(password))(ZIO.fail(HttpValidationFields("password_authFormTI",RegistrationError.passwordValidationError.message)))
+                _ <- ZIO.when(!isValidEmail(email))(ZIO.fail(HttpValidationFields("email_authFormTI", RegistrationError.emailValidationError.message)))
                 person <- service.authPerson(email,password)
-                result <- ZIO.from(Response.json(person.toJson))
+                result <- if person.isEmpty
+                  then ZIO.from(Response.json(
+                    HttpValidationResponse(false, List(HttpValidationFields("email_authFormTI", "Пользователь с такой почтой не зарегистрирован"))).toJson
+                  ))
+                else 
+                  ZIO.from(Response.json(
+                    person.map( p =>
+                      ClientPerson(p.surname, p.email,p.phone, p.role, p.firstname, p.middlename, p.is_confirm_email, p.is_confirm_phone)
+                    ).head.toJson
+                  ))
               }yield result
             case AuthType.emailAuth =>
               for{
@@ -122,7 +131,12 @@ object PersonRoute {
               }yield result
             case AuthType.phoneAuth => ZIO.from(Response.text("ага щас нет такого входа еще"))
         } yield response
-      ).catchAll(err => ZIO.from( Response.json(HttpResponse(false, err.getMessage).toJson) ))
+      ).catchAll {
+        case value:HttpValidationFields =>
+          ZIO.from(Response.json(HttpValidationResponse(false, List(value)).toJson))
+        case otherError =>
+          ZIO.from(Response.json(HttpResponse(false, otherError.getMessage).toJson))
+      }
     },
     Method.POST / "password" -> handler { (req:Request) =>
       (
@@ -131,11 +145,29 @@ object PersonRoute {
           token <- getToken(req)
           _ <- storage.updateTime(token)
           body <- req.body.asString
-          password <- ZIO.from(body.fromJson[SetPassword]).mapError(err => new Exception("Ошибка парсинга " + err))
-          userService <- ZIO.service[PersonTrait]
-          response <- ZIO.from(Response.text(""))
+          setPassword <- ZIO.from(body.fromJson[SetPassword]).mapError(err => new Exception("Ошибка парсинга " + err))
+          currentPerson <- storage.get(token).flatMap(ZIO.fromOption(_)).mapError(ex => new Exception("Авторизируйтесь заново"))
+          personService <- ZIO.service[PersonTrait]
+          updatePass <- setPassword.oldPassword match
+            case Some(password) => personService.updatePassword(
+              currentPerson.person.id,
+              setPassword.password,
+              setPassword.repeatPassword,
+              password
+            )
+            case None => personService.setPassword(
+              currentPerson.person.id,
+              setPassword.password,
+              setPassword.repeatPassword
+            )
+          response <- updatePass match
+            case Left(value) =>
+              if value >= 1 then ZIO.from( Response.json(HttpResponse(true, "Данные обновлены").toJson) )
+              else ZIO.from( Response.json(HttpResponse(false, "Не получилось найти нужного пользователя").toJson) )
+            case Right(value) =>
+              ZIO.from(Response.json(HttpValidationResponse(false, value).toJson))
         }yield response
-        ).catchAll(ex =>  ZIO.from( Response.json(HttpResponse(false, ex.getMessage).toJson)))
+      ).catchAll(ex =>  ZIO.from( Response.json(HttpResponse(false, ex.getMessage).toJson)))
     },
     Method.POST / "personInfo" -> handler { (req:Request) =>
       (

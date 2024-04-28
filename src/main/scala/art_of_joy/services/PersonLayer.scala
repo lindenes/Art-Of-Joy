@@ -37,11 +37,16 @@ object PersonLayer {
       (emailChecker,"email", RegistrationError.emailCheckerError),
       (phoneChecker,"phone", RegistrationError.phoneCheckerError)
     ).collect{ case (false, fieldName, msg) => HttpValidationFields(fieldName, msg.message)}
+
+  private def getPasswordError(repeatValid:Boolean, passwordValid:Boolean, isOldEqual:Boolean, oldEqualNewValid:Boolean) =
+    List(
+      (repeatValid, "passwordRepeat_userInfoFormTI", "Пароли не совпадают"),
+      (passwordValid, "password_userInfoFormTI", RegistrationError.passwordValidationError.message),
+      (isOldEqual, "", "Неверный старый пароль"),
+      (oldEqualNewValid, "", "Новый пароль совпадает со старым")
+    ).collect{ case (false, fieldName, msg) => HttpValidationFields(fieldName, msg)}
+
   private def getPassword(setPassword: SetPassword):List[HttpValidationFields] = ???
-//    List(
-//      (isValidPassword(setPassword.password), SetPasswordError.passwordValidationError.message),
-//      (setPassword.repeatPassword == setPassword.password, SetPasswordError.notEqual)
-//    )
 
   val live = ZLayer.succeed(
     new PersonTrait {
@@ -163,7 +168,28 @@ object PersonLayer {
           ))
         }yield token
 
-      override def setPassword(personID:Int, password: SetPassword): ZIO[DataSource, Throwable, HttpResponse] = ???
+      override def setPassword(personID:Int, newPassword:String, repeatPassword:String):ZIO[DataSource, Throwable, Either[Long, List[HttpValidationFields]]] =
+        for{
+          validationError <- ZIO.from(
+            getPasswordError(
+              newPassword == repeatPassword,
+              isValidPassword(newPassword),
+              true,
+              true
+            )
+          )
+          result <-
+            if (validationError.isEmpty)
+                ctx.run(
+                  quote{
+                    query[Person].filter(_.id == lift(personID)).update(_.password_hash -> lift(Option(passToHash(newPassword))))
+                  }
+                ).map(Left(_))
+            else
+              ZIO.from(validationError).map(Right(_))
+        }yield result
+        
+      override def updatePassword(personID: Int, newPassword: String, repeatPassword: String, oldPassword: String): ZIO[DataSource, Throwable, Either[Long, List[HttpValidationFields]]] = ???
 
       override def setPersonInfo(id:Long, surname:String, firstname:String, middleName:Option[String]): ZIO[DataSource, Throwable, Long] =
         ctx.run(
