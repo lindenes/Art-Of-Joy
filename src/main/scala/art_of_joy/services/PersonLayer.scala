@@ -123,7 +123,7 @@ object PersonLayer {
                   _ <- emailService.sendMessage("Подтверждение почты", s"Ваш код подтверждения $acceptCode", email)
                   _ <- storage.put(sessionID, StoragePerson(
                     Person(id = -1, email = Option(email), role = Role.user.ordinal, is_confirm_email = false, is_confirm_phone = false),
-                    new Date().getTime, Option(acceptCode)
+                    new Date().getTime, acceptCode
                   ))
                 }yield sessionID
               ).map(Left(_))
@@ -159,7 +159,7 @@ object PersonLayer {
             UUID.randomUUID.toString
           )
           _ <- service.put(token, StoragePerson(
-            Person(email = Option(email)), new Date().getTime, Option(generateCode)
+            Person(email = Option(email)), new Date().getTime, generateCode
           ))
         }yield token
 

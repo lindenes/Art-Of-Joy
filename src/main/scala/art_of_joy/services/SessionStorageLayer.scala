@@ -8,7 +8,7 @@ import java.time.*
 import java.util.Date
 object SessionStorageLayer {
 
-  case class StoragePerson(person:Person, lastVisitTime:Long, acceptCode:Option[String] = None)
+  case class StoragePerson(person:Person, lastVisitTime:Long, acceptCode:String = "")
 
   private def checkExpired(userList: Map[String, StoragePerson]):ZIO[Scope,Throwable, List[String]] = {
     val currentTime = new Date().getTime
@@ -51,7 +51,7 @@ object SessionStorageLayer {
               inactiveUsers <- checkExpired(persons)
             }yield inactiveUsers
 
-          override def setAcceptCode(key: String, code:Option[String]): ZIO[Scope, Throwable, Unit] =
+          override def setAcceptCode(key: String, code:String): ZIO[Scope, Throwable, Unit] =
             for {
               storagePerson <- get(key)
               user <- ZIO.fromOption(storagePerson).mapError(err => new Exception("Not found user in storage"))
@@ -63,7 +63,7 @@ object SessionStorageLayer {
             for {
               storagePerson <- get(key)
               user <- ZIO.fromOption(storagePerson).mapError(err => new Exception("Not found user in storage"))
-              updatedPerson <- ZIO.from(user.copy(acceptCode = None))
+              updatedPerson <- ZIO.from(user.copy(acceptCode = ""))
               storage <- ref.update(_.updated(key, updatedPerson))
             } yield storage
 

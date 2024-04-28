@@ -67,9 +67,8 @@ object PersonRoute {
                 case AcceptCodeType.registration =>
                   for{
                     userService <- ZIO.service[PersonTrait]
-                    response <- value.acceptCode.map(_ == body.acceptCode) match
-                      case Some(equal) =>
-                        if (equal)
+                    response <- 
+                        if (value.acceptCode == body.acceptCode)
                           for{
                             userService <- ZIO.service[PersonTrait]
                             person <- userService.addPerson(value.person.copy(is_confirm_email = true))
@@ -78,7 +77,6 @@ object PersonRoute {
                           }yield response
                         else
                           ZIO.from(Response.json(HttpResponse(false, List("Неверный код подтверждения")).toJson))
-                      case None => ZIO.from(Response.json(HttpResponse(false, List("Нет кода подтверждения в хранилище")).toJson))
                   }yield response
                 case AcceptCodeType.authorization =>
                   for{
