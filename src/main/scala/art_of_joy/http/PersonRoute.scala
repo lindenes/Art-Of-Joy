@@ -108,6 +108,8 @@ object PersonRoute {
                 password <- ZIO.fromOption(data.password).mapError(err => new Exception("Не ввели пароль"))
                 _ <- ZIO.when(!isValidPassword(password))(ZIO.fail(HttpValidationFields("password_authFormTI",RegistrationError.passwordValidationError.message)))
                 _ <- ZIO.when(!isValidEmail(email))(ZIO.fail(HttpValidationFields("email_authFormTI", RegistrationError.emailValidationError.message)))
+                passwordByEmail <- service.getPersonByEmail(email).map(_.head.password_hash)
+                _ <- ZIO.when(passwordByEmail.isEmpty)(ZIO.fail(HttpValidationFields("password_authFormTI","У пользователя не установлен пароль")))
                 person <- service.authPerson(email,password)
                 result <- if person.isEmpty
                   then ZIO.from(Response.json(
