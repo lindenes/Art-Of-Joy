@@ -116,7 +116,7 @@ object PersonRoute {
                 else 
                   ZIO.from(Response.json(
                     person.map( p =>
-                      ClientPerson(p.surname, p.email,p.phone, p.role, p.firstname, p.middlename, p.is_confirm_email, p.is_confirm_phone)
+                      ClientPerson(p.surname, p.email,p.phone, p.role, p.firstname, p.middlename, p.is_confirm_email, p.is_confirm_phone, p.password_hash.nonEmpty)
                     ).head.toJson
                   ))
               }yield result

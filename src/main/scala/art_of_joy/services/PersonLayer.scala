@@ -42,8 +42,8 @@ object PersonLayer {
     List(
       (repeatValid, "passwordRepeat_userInfoFormTI", "Пароли не совпадают"),
       (passwordValid, "password_userInfoFormTI", RegistrationError.passwordValidationError.message),
-      (isOldEqual, "", "Неверный старый пароль"),
-      (oldEqualNewValid, "", "Новый пароль совпадает со старым")
+      (isOldEqual, "oldPassword_userInfoFormTI", "Неверный старый пароль"),
+      (oldEqualNewValid, "oldPassword_userInfoFormTI", "Новый пароль совпадает со старым")
     ).collect{ case (false, fieldName, msg) => HttpValidationFields(fieldName, msg)}
 
   private def getPassword(setPassword: SetPassword):List[HttpValidationFields] = ???
@@ -188,8 +188,36 @@ object PersonLayer {
             else
               ZIO.from(validationError).map(Right(_))
         }yield result
+
+      override def getPersonByID(personID: Long): ZIO[DataSource, Throwable, Person] =
+        ctx.run(
+          quote{
+            query[Person].filter(_.id == lift(personID))
+          }
+        ).map(_.head)
         
-      override def updatePassword(personID: Int, newPassword: String, repeatPassword: String, oldPassword: String): ZIO[DataSource, Throwable, Either[Long, List[HttpValidationFields]]] = ???
+      override def updatePassword(personID: Int, newPassword: String, repeatPassword: String, oldPassword: String): ZIO[DataSource, Throwable, Either[Long, List[HttpValidationFields]]] =
+        for{
+          dbPersonPass <- getPersonByID(personID)
+          newPassHash <- ZIO.from(passToHash(newPassword))
+          validationError <- ZIO.from(
+            getPasswordError(
+              newPassword == repeatPassword,
+              isValidPassword(newPassword),
+              newPassHash == dbPersonPass.password_hash.get,
+              newPassword != oldPassword
+            )
+          )
+          result <-
+            if (validationError.isEmpty)
+              ctx.run(
+                quote{
+                  query[Person].filter(_.id == lift(personID)).update(_.password_hash -> lift(Option(newPassHash)))
+                }
+              ).map(Left(_))
+            else
+              ZIO.from(validationError).map(Right(_))
+        }yield result
 
       override def setPersonInfo(id:Long, surname:String, firstname:String, middleName:Option[String]): ZIO[DataSource, Throwable, Long] =
         ctx.run(

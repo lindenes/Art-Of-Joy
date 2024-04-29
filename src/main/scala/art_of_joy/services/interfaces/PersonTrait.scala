@@ -8,6 +8,7 @@ import javax.sql.DataSource
 trait PersonTrait {
   def getAllPersons(startRow:Int, endRow:Option[Int]):ZIO[DataSource, Throwable, List[Person]]
   def getPersonByEmail(email:String):ZIO[DataSource,Throwable, List[Person]]
+  def getPersonByID(personID:Long):ZIO[DataSource,Throwable, Person]
   def authPerson(email:String, password:String):ZIO[DataSource, Throwable, List[Person]]
   def authPersonOnEmail(email:String):ZIO[DataSource & SessionStorageTrait, Throwable, String]
   def checkEmail(email:String):ZIO[DataSource, Throwable, Boolean]
