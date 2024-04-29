@@ -32,10 +32,10 @@ object PersonLayer {
 
   private def getRegistrationError(passwordValid:Boolean, emailValid:Boolean, emailChecker:Boolean,phoneChecker:Boolean) =
     List(
-      (passwordValid,"password", RegistrationError.passwordValidationError),
-      (emailValid,"email", RegistrationError.emailValidationError),
-      (emailChecker,"email", RegistrationError.emailCheckerError),
-      (phoneChecker,"phone", RegistrationError.phoneCheckerError)
+      (passwordValid,"password_regFormTI", RegistrationError.passwordValidationError),
+      (emailValid,"email_regFormTI", RegistrationError.emailValidationError),
+      (emailChecker,"email_regFormTI", RegistrationError.emailCheckerError),
+      (phoneChecker,"phone_regFormTI", RegistrationError.phoneCheckerError)
     ).collect{ case (false, fieldName, msg) => HttpValidationFields(fieldName, msg.message)}
 
   private def getPasswordError(repeatValid:Boolean, passwordValid:Boolean, isOldEqual:Boolean, oldEqualNewValid:Boolean) =
