@@ -3,14 +3,14 @@ import art_of_joy.ctx
 import art_of_joy.services.interfaces.CategoryTrait
 import zio.{ZIO, ZLayer}
 import io.getquill.*
-import art_of_joy.model.category.{Brand, Category, CategoryFull, SubCategoryFromClient, Subcategory}
+import art_of_joy.model.category._
 
 import javax.sql.DataSource
 object CategoryLayer {
   import ctx._
   val live = ZLayer.succeed(
     new CategoryTrait {
-      override def getFullCategoryList: ZIO[DataSource, Throwable, List[CategoryFull]] =
+      override def getFullCategoryList: ZIO[DataSource, Throwable, List[ClientCategory]] =
         for{
           categoryList <- ctx.run(
             quote {
@@ -19,13 +19,14 @@ object CategoryLayer {
           )
           fullCategory <- ZIO.from(
             categoryList.map(_._1).distinct.map(category =>
-              CategoryFull(
-                category,
+              ClientCategory(
+                category.id,
+                category.name,
                 categoryList.map(_._2).filter{sc =>
                   sc match
                     case Some(value) => value.category_id == category.id
                     case None => false
-                }
+                }.collect{case Some(value) => value}
             ))
           )
         }yield fullCategory
