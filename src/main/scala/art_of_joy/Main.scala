@@ -1,3 +1,4 @@
+package art_of_joy
 import io.getquill.*
 import io.getquill.jdbczio.Quill.DataSource
 import zio.*

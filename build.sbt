@@ -1,4 +1,4 @@
-ThisBuild / version := "0.1.0-SNAPSHOT"
+ThisBuild / version := "0.1.0"
 
 ThisBuild / scalaVersion := "3.4.0"
 
@@ -18,7 +18,16 @@ lazy val zioLib = Seq(
 
 lazy val root = (project in file("."))
   .settings(
+    assembly / mainClass := Some("Main"),
+     assembly / assemblyMergeStrategy := {
+      case PathList("META-INF", _*) => MergeStrategy.discard
+      case "application.conf" => MergeStrategy.concat
+      case _ => MergeStrategy.first
+    },
+    assembly / assemblyJarName := "ArtOfJoy.jar",
     name := "Art-Of-Joy",
+    mainClass := Some("art_of_joy.Main"),
+    Compile / mainClass := Some("art_of_joy.Main"),
     libraryDependencies ++= Seq(
       "io.getquill"          %% "quill-jdbc-zio" % "4.8.1",
       "org.postgresql"       %  "postgresql"     % "42.7.1",
