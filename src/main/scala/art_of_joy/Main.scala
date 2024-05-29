@@ -11,6 +11,7 @@ import art_of_joy.http.getRoutes
 import art_of_joy.services
 import art_of_joy.services.interfaces.{CategoryTrait, SessionStorageTrait}
 import art_of_joy.services.*
+import art_of_joy.utils.Migration
 object Main extends ZIOAppDefault{
   
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
@@ -22,6 +23,7 @@ object Main extends ZIOAppDefault{
   override def run =
     (
       for{
+        _ <- Migration.createTables
         _ <- (
           for{
             service <- ZIO.service[SessionStorageTrait]
