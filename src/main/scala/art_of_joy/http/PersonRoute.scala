@@ -37,7 +37,7 @@ object PersonRoute {
           regInfo <- ZIO.fromEither(body.fromJson[RegPerson]).mapError(err => new Exception("Ошибка парсинга " + err))
           _ <- ZIO.when(regInfo.email.isEmpty && regInfo.phone.isEmpty)(ZIO.fail(new Exception("Не передана почта или номер телефона для регистрации")))
           callBack <- regInfo.email match
-            case Some(value) => service.emailRegistration(value)
+            case Some(value) => service.emailRegistration(value.toLowerCase)
             case None => service.phoneRegistration(regInfo.phone.get)
           response <- callBack match
             case Left(sessionID) =>
@@ -46,7 +46,9 @@ object PersonRoute {
                 result <- storage.get(sessionID)
               }yield result match
                 case Some(storagePerson) => Response.json(
-                  s"""{"token":"$sessionID"}""")
+                    HttpResponse(true, "Код подтверждения отправлен").toJson)
+                  .addHeaders(Headers("Access-Control-Expose-Headers" -> "token"))
+                  .addHeaders(Headers("Token" -> sessionID))
                 case None => Response.json(HttpResponse(false, "Авторизируйтесь заново").toJson)
             case Right(errorList) => ZIO.from( Response.json(HttpValidationResponse(false, errorList).toJson) )
         }yield response
@@ -113,6 +115,9 @@ object PersonRoute {
                 _ <- ZIO.when(passwordByEmail.isEmpty)(ZIO.fail(HttpValidationFields("password_authFormTI","У пользователя не установлен пароль")))
                 _ <- ZIO.when(!isValidPassword(password))(ZIO.fail(HttpValidationFields("password_authFormTI",RegistrationError.passwordValidationError.message)))
                 person <- service.authPerson(email,password)
+                sessionStorage <- ZIO.service[SessionStorageTrait]
+                token <- ZIO.from(UUID.randomUUID.toString)
+                _ <- sessionStorage.put(token, StoragePerson(person.head, new Date().getTime))
                 result <- if person.isEmpty
                   then ZIO.from(Response.json(
                     HttpValidationResponse(false, List(HttpValidationFields("email_authFormTI", "Пользователь с такой почтой не зарегистрирован"))).toJson
@@ -122,7 +127,9 @@ object PersonRoute {
                     person.map( p =>
                       ClientPerson(p.surname, p.email,p.phone, p.role, p.firstname, p.middlename, p.is_confirm_email, p.is_confirm_phone, p.password_hash.nonEmpty)
                     ).head.toJson
-                  ))
+                  ).addHeaders(Headers("Access-Control-Expose-Headers" -> "token"))
+                    .addHeaders(Headers("Token" -> token))
+                  )
               }yield result
             case AuthType.emailAuth =>
               for{
@@ -130,7 +137,9 @@ object PersonRoute {
                 token <- service.authPersonOnEmail(email)
                 result <- ZIO.from(
                   Response.json(
-                    s"""{"token":"$token"}""")
+                    HttpResponse(true, "Код подтверждения отправлен").toJson)
+                    .addHeaders(Headers("Access-Control-Expose-Headers" -> "token"))
+                    .addHeaders(Headers("Token" -> token))
                 )
               }yield result
             case AuthType.phoneAuth => ZIO.from(Response.text("ага щас нет такого входа еще"))
