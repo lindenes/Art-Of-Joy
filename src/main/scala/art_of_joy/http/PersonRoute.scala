@@ -134,6 +134,13 @@ object PersonRoute {
                 )
               }yield result
             case AuthType.phoneAuth => ZIO.from(Response.text("ага щас нет такого входа еще"))
+            case tokenAuth =>
+              for{
+                token <- getToken(req)
+                service <- ZIO.service[SessionStorageTrait]
+                user <- service.get(token)
+                result <- ZIO.fromOption(user).mapError(err => new Exception("Не найден пользователь"))
+              }yield Response.json(result.person.toClientPerson.toJson)
         } yield response
       ).catchAll {
         case value:HttpValidationFields =>

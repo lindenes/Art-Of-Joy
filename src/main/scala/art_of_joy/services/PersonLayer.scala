@@ -70,43 +70,35 @@ object PersonLayer {
         }yield users
 
       override def getPersonByEmail(email:String): ZIO[DataSource, Throwable, List[Person]] =
-        for{
-          user <- ctx.run(
-            quote{
-              query[Person].filter(p => 
-                p.email == lift(Option(email))
-              )
-            }
-          )
-        }yield user
+        ctx.run(
+          quote{
+            query[Person].filter(p =>
+              p.email == lift(Option(email))
+            )
+          }
+        )
 
       override def authPerson(email: String, password: String): ZIO[DataSource, Throwable, List[Person]] =
-        for{
-          user <- ctx.run(
-            quote{
-              query[Person].filter(p => p.email == lift(Option(email)) && p.password_hash.getOrElse("") == lift(passToHash(password)))
-            }
-          )
-        }yield user
+        ctx.run(
+          quote{
+            query[Person].filter(p => p.email == lift(Option(email)) && p.password_hash.getOrElse("") == lift(passToHash(password)))
+          }
+        )
 
       override def checkEmail(email: String): ZIO[DataSource, Throwable, Boolean] =
-        for{
-          user <- ctx.run(
-            quote{
-              query[Person].filter(p => p.email == lift(Option(email)) )
-            }
-          )
-        }yield user.isEmpty
+        ctx.run(
+          quote{
+            query[Person].filter(p => p.email == lift(Option(email)) )
+          }
+        ).map(_.isEmpty)
 
 
       override def checkPhone(phone: String): ZIO[DataSource, Throwable, Boolean] =
-        for {
-          user <- ctx.run(
-            quote {
-              query[Person].filter(p => p.phone == lift(Option(phone)))
-            }
-          )
-        } yield user.isEmpty
+        ctx.run(
+          quote {
+            query[Person].filter(p => p.phone == lift(Option(phone)))
+          }
+        ).map(_.isEmpty)
 
       override def emailRegistration(email: String): ZIO[SessionStorageTrait & DataSource & EmailServiceTrait, Throwable, Either[String, List[HttpValidationFields]]] =
         for{
@@ -120,9 +112,7 @@ object PersonLayer {
               (
                 for{
                   storage <- ZIO.service[SessionStorageTrait]
-                  sessionID <- ZIO.from(
-                    UUID.randomUUID.toString
-                  )
+                  sessionID <- ZIO.from(UUID.randomUUID.toString)
                   acceptCode <- ZIO.succeed(generateCode)
                   emailService <- ZIO.service[EmailServiceTrait]
                   _ <- emailService.sendMessage("Подтверждение почты", s"Ваш код подтверждения $acceptCode", email)
@@ -138,22 +128,20 @@ object PersonLayer {
       override def phoneRegistration(phone: String): ZIO[SessionStorageTrait, Throwable, Either[String, List[HttpValidationFields]]] = ???
 
       override def addPerson(person: Person): ZIO[DataSource, Throwable, Person] =
-        for {
-          user <- ctx.run(
-            quote {
-              query[Person].insert(
-                _.role -> lift(person.role),
-                _.phone -> lift(person.phone),
-                _.email -> lift(person.email),
-                _.surname -> lift(person.surname),
-                _.firstname -> lift(person.firstname),
-                _.middlename -> lift(person.middlename),
-                _.is_confirm_email -> lift(person.is_confirm_email),
-                _.is_confirm_phone -> lift(person.is_confirm_phone),
-              ).returning(p => p)
-            }
-          )
-        } yield user
+        ctx.run(
+          quote {
+            query[Person].insert(
+              _.role -> lift(person.role),
+              _.phone -> lift(person.phone),
+              _.email -> lift(person.email),
+              _.surname -> lift(person.surname),
+              _.firstname -> lift(person.firstname),
+              _.middlename -> lift(person.middlename),
+              _.is_confirm_email -> lift(person.is_confirm_email),
+              _.is_confirm_phone -> lift(person.is_confirm_phone),
+            ).returning(p => p)
+          }
+        )
 
       override def authPersonOnEmail(email: String): ZIO[DataSource & SessionStorageTrait, Throwable, String] =
         for{

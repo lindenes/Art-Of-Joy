@@ -12,7 +12,7 @@ case class ClientPerson(
                          middlename:Option[String] = None,
                          is_confirm_email:Boolean = false,
                          is_confirm_phone:Boolean = false,
-                         isPassoword:Boolean
+                         isPassword:Boolean
                  )
 
 object ClientPerson{

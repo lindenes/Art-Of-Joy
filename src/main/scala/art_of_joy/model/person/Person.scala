@@ -14,7 +14,11 @@ case class Person(surname:Option[String] = None,
                   password_hash:Option[String] = None,
                   is_confirm_email:Boolean = false,
                   is_confirm_phone:Boolean = false
-                 )
+                 ){
+  def toClientPerson = ClientPerson(
+    surname, email, phone,role,firstname, middlename,is_confirm_email,is_confirm_phone, password_hash.nonEmpty
+  )
+}
 
 object Person{
   implicit val decoder: JsonDecoder[Person] = DeriveJsonDecoder.gen[Person]
