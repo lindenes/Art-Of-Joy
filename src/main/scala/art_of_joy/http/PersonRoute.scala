@@ -134,7 +134,7 @@ object PersonRoute {
                 )
               }yield result
             case AuthType.phoneAuth => ZIO.from(Response.text("ага щас нет такого входа еще"))
-            case tokenAuth =>
+            case AuthType.tokenAuth =>
               for{
                 token <- getToken(req)
                 service <- ZIO.service[SessionStorageTrait]
