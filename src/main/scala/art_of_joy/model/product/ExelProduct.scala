@@ -20,7 +20,7 @@ case class ExelProduct(
                         width:Option[String],
                         size:Option[String],
                         ru_size:Option[String],
-                        mediaFile:Option[String]
+                        mediaFile:Array[String]
                       )
 object ExelProduct{
   implicit val encoder: JsonEncoder[ExelProduct] = DeriveJsonEncoder.gen[ExelProduct]

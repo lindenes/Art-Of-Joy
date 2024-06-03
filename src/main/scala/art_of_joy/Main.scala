@@ -2,13 +2,11 @@ package art_of_joy
 import io.getquill.*
 import io.getquill.jdbczio.Quill.DataSource
 import zio.*
-import com.typesafe.config.*
 import art_of_joy.config.ApplicationConfig
 import zio.config.typesafe.TypesafeConfigProvider
 import zio.http.*
 import zio.http.netty.NettyConfig
 import art_of_joy.http.getRoutes
-import art_of_joy.services
 import art_of_joy.services.interfaces.{CategoryTrait, SessionStorageTrait}
 import art_of_joy.services.*
 import art_of_joy.utils.Migration
@@ -45,7 +43,8 @@ object Main extends ZIOAppDefault{
         SessionStorageLayer.live,
         EmailServiceLayer.live,
         ExelLayer.live,
-        ProductLayer.live
+        ProductLayer.live,
+        ZClient.default
       )
 }
 
