@@ -13,7 +13,7 @@ case class ExelProduct(
                         article_wb:Option[String],
                         barcode:Option[String],
                         material:Option[String],
-                        fragility:Option[String],
+                        fragility:Option[Boolean],
                         product_country:Option[String],
                         color:Option[String],
                         height:Option[String],
