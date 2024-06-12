@@ -1,57 +1,72 @@
 package art_of_joy.http
 
-import art_of_joy.model.category.SubCategoryFromClient
+import art_of_joy.model.category._
 import art_of_joy.model.http.HttpResponse
 import art_of_joy.services.interfaces.{CategoryTrait, SessionStorageTrait}
-import zio.http.*
 import zio.*
-import zio.json.ast.{Json, JsonCursor}
-import zio.json._
+import sttp.tapir.ztapir.*
+import sttp.tapir.server.ziohttp.ZioHttpInterpreter
+import sttp.tapir.generic.auto.*
+import sttp.tapir.json.zio.*
+import art_of_joy.utils.*
 object CategoryRoute {
-  def getRoutes = Routes(
-    Method.PUT / "category" -> handler{ (req:Request) =>
-      (
-        for{
-          token <- ZIO.fromOption(req.headers.find(_.headerName == "token").map(_.renderedValue)).mapError(err => new Exception("token not found"))
-          sessionStorage <- ZIO.service[SessionStorageTrait]
-          _ <- sessionStorage.updateTime(token)
-          data <- req.body.asString
-          body <- ZIO.from(data.fromJson[List[Json]]).mapError(err => new Exception(err))
-          names <- ZIO.from( body.map(field => {
-            field.get(JsonCursor.field("name")) match
-              case Right(value) => value.asString
-              case Left(value) => None
-          }).collect{case Some(value) => value}
-          )
-          service <- ZIO.service[CategoryTrait]
-          _ <- service.addCategory(names)
-        }yield Response.json(HttpResponse(message = "Успешно").toJson)
-        ).catchAll(err => ZIO.from(Response.error(Status.BadRequest, err.getMessage)))
-    },
-    Method.PUT / "subCategory" -> handler{ (req:Request) =>
-      (
-        for{
-          token <- ZIO.fromOption(req.headers.find(_.headerName == "token").map(_.renderedValue)).mapError(err => new Exception("token not found"))
-          sessionStorage <- ZIO.service[SessionStorageTrait]
-          _ <- sessionStorage.updateTime(token)
-          service <- ZIO.service[CategoryTrait]
-          data <- req.body.asString
-          subCategoryList <- ZIO.fromEither(data.fromJson[List[SubCategoryFromClient]]).mapError(err => new Exception(err))
-          _ <- service.addSubCategory(subCategoryList)
-        }yield Response.json(HttpResponse(message = "Успешно").toJson)
-        ).catchAll(err => ZIO.from(Response.error(Status.BadRequest, err.getMessage)))
-    },
-    Method.GET / "category" -> Handler.fromZIO(
-      for{
-        services <- ZIO.service[CategoryTrait]
-        category <- services.getFullCategoryList
-      }yield Response.json(category.toJson)
-    ),
-    Method.GET / "brand" -> Handler.fromZIO(
-      for{
-        services <- ZIO.service[CategoryTrait]
-        brand <- services.getBrandList
-      }yield Response.json(brand.toJson)
+  val categoryRoute = List(
+      endpoint.post
+        .in("category")
+        .in(token)
+        .in(jsonBody[CategoryAdd])
+        .out(jsonBody[HttpResponse])
+        .errorOut(jsonBody[HttpResponse])
+        .zServerLogic( (token, categoryAdd) =>
+          (
+            for {
+              sessionStorage <- ZIO.service[SessionStorageTrait]
+              _ <- sessionStorage.updateTime(token)
+              service <- ZIO.service[CategoryTrait]
+              _ <- service.addCategory(categoryAdd.names)
+            } yield HttpResponse(message = "Успешно")
+          ).mapError(err => HttpResponse(false, err.getMessage))
+        ),
+      endpoint.post
+        .in("subCategory")
+        .in(token)
+        .in(jsonBody[List[SubCategoryFromClient]])
+        .out(jsonBody[HttpResponse])
+        .errorOut(jsonBody[HttpResponse])
+        .zServerLogic( (token, subCategoryList) =>
+          (
+            for{
+              sessionStorage <- ZIO.service[SessionStorageTrait]
+              _ <- sessionStorage.updateTime(token)
+              service <- ZIO.service[CategoryTrait]
+              _ <- service.addSubCategory(subCategoryList)
+            }yield HttpResponse(message = "Успешно")
+          ).mapError(err => HttpResponse(false, err.getMessage))
+        ),
+      endpoint.get
+        .in("category")
+        .out(jsonBody[List[ClientCategory]])
+        .errorOut(jsonBody[HttpResponse])
+        .zServerLogic( _ =>
+          (
+            for{
+              services <- ZIO.service[CategoryTrait]
+              category <- services.getFullCategoryList
+            }yield category
+          ).mapError(err => HttpResponse(false, err.getMessage))
+        ),
+      endpoint.get
+        .in("brand")
+        .out(jsonBody[List[Brand]])
+        .errorOut(jsonBody[HttpResponse])
+        .zServerLogic(_ =>
+          (
+            for{
+              services <- ZIO.service[CategoryTrait]
+              brand <- services.getBrandList
+            }yield brand
+          ).mapError(err => HttpResponse(false, err.getMessage))
+        )
     )
-  ).sandbox
+  val routes = ZioHttpInterpreter().toHttp(categoryRoute)
 }

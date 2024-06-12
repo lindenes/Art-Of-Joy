@@ -1,5 +1,6 @@
 package art_of_joy
 
+import sttp.tapir._
 import zio.ZIO
 import zio.http.Request
 
@@ -30,5 +31,5 @@ package object utils {
       for (_ <- 1 to 6)
         yield chars(random.nextInt(chars.length))
     ).mkString
-  def getToken(req:Request): ZIO[Any, Exception, String] = ZIO.fromOption(req.headers.find(_.headerName == "Token").map(_.renderedValue)).mapError(err => new Exception("token not found"))
+  val token = header[String]("Token")
 }
