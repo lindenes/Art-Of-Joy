@@ -53,5 +53,5 @@ object CategoryRoute {
         brand <- services.getBrandList
       }yield Response.json(brand.toJson)
     )
-  ).sandbox.toHttpApp
+  ).sandbox
 }

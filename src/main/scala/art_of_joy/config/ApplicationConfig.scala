@@ -11,7 +11,7 @@ import zio.http.netty.NettyConfig
 import java.net.InetSocketAddress
 object ApplicationConfig {
 
-  case class ApiEndPoint(host: String,threadSize:Int, port: Int, timeoutSec: Int)
+  case class ApiEndPoint(host: String,threadSize:Int, port: Int, timeoutSec: Int, maxInitialLineLength:Int)
 
   private val appConfig = deriveConfig[ApiEndPoint].nested("api")
 
@@ -33,7 +33,8 @@ object ApplicationConfig {
           logWarningOnFatalError = true,
           gracefulShutdownTimeout = data.timeoutSec.second,
           webSocketConfig = WebSocketConfig.default,
-          idleTimeout = None
+          idleTimeout = None,
+          maxInitialLineLength = data.maxInitialLineLength
         )
       }
     )

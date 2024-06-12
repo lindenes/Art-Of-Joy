@@ -13,5 +13,5 @@ package object http {
       },
      // allowedMethods = AccessControlAllowMethods(Method.PUT, Method.POST, Method.GET, Method.DELETE),
     )
-  def getRoutes = (CategoryRoute.getRoutes ++ PersonRoute.getRoutes ++ ProductRoute.getRoutes) @@ cors(config)
+  def getRoutes = (CategoryRoute.getRoutes ++ PersonRoute.getRoutes ++ ProductRoute.routes) @@ cors(config)
 }

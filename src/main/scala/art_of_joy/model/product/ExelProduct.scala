@@ -23,5 +23,6 @@ case class ExelProduct(
                         mediaFile:Array[String]
                       )
 object ExelProduct{
+  implicit val decoder: JsonDecoder[ExelProduct] = DeriveJsonDecoder.gen[ExelProduct]
   implicit val encoder: JsonEncoder[ExelProduct] = DeriveJsonEncoder.gen[ExelProduct]
 }

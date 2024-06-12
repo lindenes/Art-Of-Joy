@@ -23,8 +23,8 @@ object PersonRoute {
           _ <- sessionStorage.updateTime(token)
           service <- ZIO.service[PersonTrait]
           users <- service.getAllPersons(
-            req.url.queryParams.get("startRow").getOrElse("0").toInt,
-            req.url.queryParams.get("endRow").map(_.toInt)
+            req.url.queryParams.queryParams("startRow").asString.toInt,
+            Option(req.url.queryParams.queryParams("startRow").asString.toInt)
           )
         }yield Response.json(users.toJson)
         ).catchAll(err => ZIO.from( Response.json(HttpResponse(false, err.getMessage).toJson) ))
@@ -215,5 +215,5 @@ object PersonRoute {
         }yield response
       ).catchAll(ex =>  ZIO.from( Response.json(HttpResponse(false, ex.getMessage).toJson)))
     }
-  ).sandbox.toHttpApp
+  ).sandbox
 }

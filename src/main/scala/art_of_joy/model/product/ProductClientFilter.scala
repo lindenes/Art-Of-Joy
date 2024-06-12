@@ -10,5 +10,6 @@ case class ProductClientFilter(
                                 name:Option[String]
                               )
 object ProductClientFilter{
-  implicit val decoder:JsonDecoder[ProductClientFilter] = DeriveJsonDecoder.gen[ProductClientFilter]
+  implicit val decoder: JsonDecoder[ProductClientFilter] = DeriveJsonDecoder.gen[ProductClientFilter]
+  implicit val encoder: JsonEncoder[ProductClientFilter] = DeriveJsonEncoder.gen[ProductClientFilter]
 }

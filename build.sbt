@@ -6,6 +6,7 @@ lazy val zioConfig = "4.0.1"
 lazy val zio = "2.0.21"
 lazy val mail = "1.6.2"
 lazy val exel = "5.2.5"
+lazy val tapir = "1.10.8"
 lazy val zioLib = Seq(
   "dev.zio" %% "zio"                 % zio,
   "dev.zio" %% "zio-streams"         % zio,
@@ -36,6 +37,9 @@ lazy val root = (project in file("."))
       "javax.mail"           % "javax.mail-api"  %  mail,
       "com.sun.mail"         % "javax.mail"      %  mail,
       "org.apache.poi"       % "poi"             %  exel,
-      "org.apache.poi"       % "poi-ooxml"       %  exel
+      "org.apache.poi"       % "poi-ooxml"       %  exel,
+      "com.softwaremill.sttp.tapir" %% "tapir-zio" % tapir,
+      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapir,
+      "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapir
     ) ++ zioLib
   )
