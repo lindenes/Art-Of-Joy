@@ -40,6 +40,7 @@ lazy val root = (project in file("."))
       "org.apache.poi"       % "poi-ooxml"       %  exel,
       "com.softwaremill.sttp.tapir" %% "tapir-zio" % tapir,
       "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapir,
-      "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapir
+      "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapir,
+      "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapir
     ) ++ zioLib
   )
