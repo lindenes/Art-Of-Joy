@@ -1,6 +1,6 @@
 package art_of_joy.services
 import art_of_joy.model.SmtpConfig
-import art_of_joy.services.interfaces.EmailServiceTrait
+import art_of_joy.services.interfaces.EmailService
 import zio.*
 import zio.config.*
 import Config.*
@@ -12,7 +12,7 @@ import java.util.Properties
 import javax.mail
 object EmailServiceLayer {
   val live = ZLayer.succeed(
-    new EmailServiceTrait {
+    new EmailService {
       override def getSmtpConfig: ZIO[Any, Throwable, SmtpConfig] = ZIO.config[SmtpConfig](deriveConfig[SmtpConfig].nested("SmtpConfig"))
 
       override def sendMessage(title: String, body: String, emailReceiver:String): ZIO[Any, Throwable, Unit] =

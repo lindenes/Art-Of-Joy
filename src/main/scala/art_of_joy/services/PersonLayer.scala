@@ -1,6 +1,6 @@
 package art_of_joy.services
 
-import art_of_joy.services.interfaces.{EmailServiceTrait, PersonTrait, SessionStorageTrait}
+import art_of_joy.services.interfaces.{EmailService, PersonService, SessionStorageService}
 import zio.{Scope, ZIO, ZLayer}
 import io.getquill.*
 
@@ -49,7 +49,7 @@ object PersonLayer {
   private def getPassword(setPassword: SetPassword):List[HttpValidationFields] = ???
 
   val live = ZLayer.succeed(
-    new PersonTrait {
+    new PersonService {
       override def getAllPersons(startRow:Int, endRow:Option[Int]): ZIO[DataSource, Throwable, List[Person]] =
         for{
           users <- endRow match
@@ -100,7 +100,7 @@ object PersonLayer {
           }
         ).map(_.isEmpty)
 
-      override def emailRegistration(email: String): ZIO[SessionStorageTrait & DataSource & EmailServiceTrait, Throwable, Either[String, List[HttpValidationFields]]] =
+      override def emailRegistration(email: String): ZIO[SessionStorageService & DataSource & EmailService, Throwable, Either[String, List[HttpValidationFields]]] =
         for{
           emailValid <- ZIO.from(isValidEmail(email))
           isEmailBusy <- checkEmail(email)
@@ -111,11 +111,10 @@ object PersonLayer {
             onFalse =
               (
                 for{
-                  storage <- ZIO.service[SessionStorageTrait]
+                  storage <- ZIO.service[SessionStorageService]
                   sessionID <- ZIO.from(UUID.randomUUID.toString)
                   acceptCode <- ZIO.succeed(generateCode)
-                  emailService <- ZIO.service[EmailServiceTrait]
-                  _ <- emailService.sendMessage("Подтверждение почты", s"Ваш код подтверждения $acceptCode", email)
+                  _ <- EmailService.sendMessage("Подтверждение почты", s"Ваш код подтверждения $acceptCode", email)
                   _ <- storage.put(sessionID, StoragePerson(
                     Person(id = -1, email = Option(email), role = Role.user.ordinal, is_confirm_email = false, is_confirm_phone = false),
                     new Date().getTime, acceptCode
@@ -125,7 +124,7 @@ object PersonLayer {
           )
         }yield result
 
-      override def phoneRegistration(phone: String): ZIO[SessionStorageTrait, Throwable, Either[String, List[HttpValidationFields]]] = ???
+      override def phoneRegistration(phone: String): ZIO[SessionStorageService, Throwable, Either[String, List[HttpValidationFields]]] = ???
 
       override def addPerson(person: Person): ZIO[DataSource, Throwable, Person] =
         ctx.run(
@@ -143,11 +142,11 @@ object PersonLayer {
           }
         )
 
-      override def authPersonOnEmail(email: String): ZIO[DataSource & SessionStorageTrait, Throwable, String] =
+      override def authPersonOnEmail(email: String): ZIO[DataSource & SessionStorageService, Throwable, String] =
         for{
           isRegistration <- checkEmail(email)
           _ <- ZIO.when(isRegistration)(ZIO.fail(new Exception("Пользователь с такой почтой не зарегистрирован")))
-          service <- ZIO.service[SessionStorageTrait]
+          service <- ZIO.service[SessionStorageService]
           token <- ZIO.from(
             UUID.randomUUID.toString
           )

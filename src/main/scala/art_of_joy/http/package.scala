@@ -1,7 +1,12 @@
 package art_of_joy
+import sttp.apispec.openapi.Info
+import sttp.tapir.server.ziohttp.ZioHttpInterpreter
+import sttp.tapir.swagger.bundle.SwaggerInterpreter
+import zio.Task
 import zio.http.*
 import zio.http.Middleware.{CorsConfig, cors}
 import zio.http.Header.{AccessControlAllowHeaders, AccessControlAllowMethods, AccessControlAllowOrigin, AccessControlExposeHeaders, Origin}
+import zio.http.endpoint.openapi.SwaggerUI
 package object http {
 
   val config: CorsConfig =
@@ -13,5 +18,10 @@ package object http {
       },
      // allowedMethods = AccessControlAllowMethods(Method.PUT, Method.POST, Method.GET, Method.DELETE),
     )
-  def getRoutes = (CategoryRoute.routes ++ PersonRoute.routes ++ ProductRoute.routes) @@ cors(config)
+
+  def getSwaggerDocRoutes = SwaggerInterpreter().fromEndpoints[Task](
+    ProductRoute.endPointList ++ PersonRoute.endPointList ++ CategoryRoute.endPointList,
+    Info("Документация по api", "0.0.1")
+  )
+  def getRoutes = (CategoryRoute.routes ++ PersonRoute.routes ++ ProductRoute.routes) @@ cors(config) ++ ZioHttpInterpreter().toHttp(getSwaggerDocRoutes)
 }

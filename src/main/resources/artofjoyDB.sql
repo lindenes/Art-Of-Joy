@@ -1,5 +1,7 @@
-CREATE TABLE IF NOT EXISTS public.person (
-    id int GENERATED ALWAYS AS IDENTITY NOT NULL,
+CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+
+CREATE TABLE IF NOT EXISTS person (
+    id int default nextval('person_id_seq') NOT NULL,
     surname varchar(50) NOT NULL,
     firstname varchar(50) NOT NULL,
     middlename varchar(50) NOT NULL,
@@ -13,29 +15,35 @@ CREATE TABLE IF NOT EXISTS public.person (
     CONSTRAINT user_pk PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.category (
-	id int GENERATED ALWAYS AS IDENTITY NOT NULL,
+CREATE SEQUENCE IF NOT EXISTS category_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+
+CREATE TABLE IF NOT EXISTS category (
+	id int default nextval('category_id_seq') NOT NULL,
 	"name" varchar(50) NOT NULL,
 	CONSTRAINT category_pk PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.subcategory (
-    id int GENERATED ALWAYS AS IDENTITY NOT NULL,
+CREATE SEQUENCE IF NOT EXISTS subcategory_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+
+CREATE TABLE IF NOT EXISTS subcategory (
+    id int default nextval('subcategory_id_seq') NOT NULL,
 	"name" varchar(50) NOT NULL,
 	category_id int NOT NULL,
 	CONSTRAINT subcategory_pk PRIMARY KEY (id)
 );
 
+CREATE SEQUENCE IF NOT EXISTS brand_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
 
-CREATE TABLE IF NOT EXISTS public.brand (
-	id int GENERATED ALWAYS AS IDENTITY NOT NULL,
+CREATE TABLE IF NOT EXISTS brand (
+    id int default nextval('brand_id_seq') NOT NULL,
 	"name" varchar(50) NOT NULL,
 	CONSTRAINT brand_pk PRIMARY KEY (id)
 );
 
+CREATE SEQUENCE IF NOT EXISTS product_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
 
-CREATE TABLE IF NOT EXISTS public.product (
-	id int GENERATED ALWAYS AS IDENTITY NOT NULL,
+CREATE TABLE IF NOT EXISTS product (
+    id int default nextval('product_id_seq') NOT NULL,
 	article varchar(40) NULL,
 	name varchar(200) NULL,
 	"description" varchar(2500) NULL,
@@ -57,9 +65,10 @@ CREATE TABLE IF NOT EXISTS public.product (
 	CONSTRAINT product_pk PRIMARY KEY (id)
 );
 
+CREATE SEQUENCE IF NOT EXISTS order_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
 
-CREATE TABLE IF NOT EXISTS public.order (
-    id int GENERATED ALWAYS AS IDENTITY NOT NULL,
+CREATE TABLE IF NOT EXISTS `order` (
+    id int default nextval('order_id_seq') NOT NULL,
 	person_id int NOT NULL,
 	address_id int NOT NULL,
     comment varchar(200) NULL,
@@ -67,8 +76,10 @@ CREATE TABLE IF NOT EXISTS public.order (
 	CONSTRAINT order_pk PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.address (
-	id int GENERATED ALWAYS AS IDENTITY NOT NULL,
+CREATE SEQUENCE IF NOT EXISTS address_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+
+CREATE TABLE IF NOT EXISTS address (
+    id int default nextval('address_id_seq') NOT NULL,
 	city varchar(50) NOT NULL,
 	street varchar(100) NOT NULL,
 	apartment_number varchar(20) NOT NULL,
@@ -76,19 +87,28 @@ CREATE TABLE IF NOT EXISTS public.address (
 	person_id int,
 	CONSTRAINT address_pk PRIMARY KEY (id)
 );
-create table IF NOT EXISTS product_image
-(id integer primary key GENERATED ALWAYS AS IDENTITY not null,
- binary_data bytea,
- product_id integer not null
+
+CREATE SEQUENCE IF NOT EXISTS product_image_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+
+create table IF NOT EXISTS product_image(
+    id int default nextval('product_image_id_seq') NOT NULL,
+    binary_data bytea,
+    product_id integer not null,
+    CONSTRAINT product_image_pk PRIMARY KEY (id)
 );
+
+CREATE SEQUENCE IF NOT EXISTS product_group_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS product_group(
-id integer primary key GENERATED ALWAYS AS IDENTITY not NULL,
-name varchar(50)
+    id int default nextval('product_group_id_seq') NOT NULL,
+    `name` varchar(50),
+    CONSTRAINT product_group_pk PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.product_order (
-	id int4 GENERATED ALWAYS AS IDENTITY NOT NULL,
+CREATE SEQUENCE IF NOT EXISTS product_order_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+
+CREATE TABLE IF NOT EXISTS product_order (
+    id int default nextval('product_order_id_seq') NOT NULL,
 	order_id int4 NOT NULL,
 	product_id int4 NOT NULL,
 	CONSTRAINT product_order_pk PRIMARY KEY (id)

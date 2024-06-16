@@ -1,7 +1,7 @@
 package art_of_joy.services
 
 import art_of_joy.model.person.Person
-import art_of_joy.services.interfaces.SessionStorageTrait
+import art_of_joy.services.interfaces.SessionStorageService
 import zio.*
 
 import java.time.*
@@ -26,12 +26,12 @@ object SessionStorageLayer {
       for{
         ref <- createRef[StoragePerson]
       }yield {
-        new SessionStorageTrait(ref) {
+        new SessionStorageService(ref) {
           override def get(key: String): ZIO[Any, Nothing, Option[StoragePerson]] = ref.get.map(_.get(key))
 
           override def put(key: String, data: StoragePerson): UIO[Unit] = ref.update(_.updated(key, data))
 
-          override def checkStorage(): UIO[Map[String, StoragePerson]] = ref.get
+          override def checkStorage: UIO[Map[String, StoragePerson]] = ref.get
 
           override def updateTime(key: String): ZIO[Scope, Throwable, Unit] =
             for{

@@ -2,7 +2,7 @@ package art_of_joy.services
 
 import art_of_joy.ctx
 import art_of_joy.model.product.{Product, ProductClientFilter}
-import art_of_joy.services.interfaces.ProductTrait
+import art_of_joy.services.interfaces.ProductService
 import io.getquill.*
 import zio.{ZIO, ZLayer}
 
@@ -11,7 +11,7 @@ object ProductLayer {
   import ctx._
 
   val live = ZLayer.succeed(
-    new ProductTrait {
+    new ProductService {
       override def getProduct(id: Long): ZIO[DataSource, Throwable, Product] = ???
 
       override def getProductList(filters:ProductClientFilter): ZIO[DataSource, Throwable, List[Product]] =

@@ -2,7 +2,7 @@ package art_of_joy.services
 
 import art_of_joy.model.`enum`.ExelField
 import art_of_joy.model.product
-import art_of_joy.services.interfaces.ExelTrait
+import art_of_joy.services.interfaces.ExelService
 import org.apache.poi.ss.usermodel.*
 import art_of_joy.model.product.{ExelProduct, Product}
 import zio.*
@@ -13,7 +13,7 @@ import java.util.Base64
 
 object ExelLayer {
   val live = ZLayer.succeed(
-    new ExelTrait {
+    new ExelService {
       override def getProductFromExel(data: Array[Byte]): ZIO[http.Client & Scope, Throwable, List[ExelProduct]] = {
         val inputStream = new ByteArrayInputStream(data)
         val sheet = WorkbookFactory.create(inputStream).getSheetAt(0)

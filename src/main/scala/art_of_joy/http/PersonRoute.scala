@@ -4,7 +4,7 @@ import art_of_joy.model.`enum`._
 import art_of_joy.model.http.*
 import art_of_joy.model.person._
 import art_of_joy.services.SessionStorageLayer.StoragePerson
-import art_of_joy.services.interfaces.{PersonTrait, SessionStorageTrait}
+import art_of_joy.services.interfaces.{PersonService, SessionStorageService}
 import zio.ZIO
 import sttp.tapir.ztapir.*
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
@@ -27,10 +27,8 @@ object PersonRoute {
       .zServerLogic((token, startRow, endRow) =>
         (
           for{
-            sessionStorage <- ZIO.service[SessionStorageTrait]
-            _ <- sessionStorage.updateTime(token)
-            service <- ZIO.service[PersonTrait]
-            users <- service.getAllPersons(startRow, endRow)
+            _ <- SessionStorageService.updateTime(token)
+            users <- PersonService.getAllPersons(startRow, endRow)
           }yield users
         ).mapError(err => HttpResponse(false, err.getMessage))
       ),
@@ -48,19 +46,16 @@ object PersonRoute {
       .zServerLogic(regInfo =>
         (
           for{
-            service <- ZIO.service[PersonTrait]
             _ <- ZIO.when(regInfo.email.isEmpty && regInfo.phone.isEmpty)(ZIO.fail(new Exception("Не передана почта или номер телефона для регистрации")))
             callBack <- regInfo.email match
-              case Some(value) => service.emailRegistration(value.toLowerCase)
-              case None => service.phoneRegistration(regInfo.phone.get)
+              case Some(value) => PersonService.emailRegistration(value.toLowerCase)
+              case None => PersonService.phoneRegistration(regInfo.phone.get)
             response <- callBack match
               case Left(sessionID) =>
-                for{
-                  storage <- ZIO.service[SessionStorageTrait]
-                  result <- storage.get(sessionID)
-                }yield result match
+                SessionStorageService.get(sessionID).map{
                   case Some(storagePerson) => (HttpResponse(true, "Код подтверждения отправлен"), sessionID, "token")
-                  case None => (HttpResponse(false, "Авторизируйтесь заново"),"", "")
+                  case None => (HttpResponse(false, "Авторизируйтесь заново"), "", "")
+                }
               case Right(errorList) => ZIO.from(
                 (HttpValidationResponse(false, errorList),"","" )
               )
@@ -81,35 +76,28 @@ object PersonRoute {
       .zServerLogic((acceptCode, token) =>
         (
           for{
-            service <- ZIO.service[SessionStorageTrait]
-            _ <- service.updateTime(token)
-            storagePerson <- service.get(token)
+            _ <- SessionStorageService.updateTime(token)
+            storagePerson <- SessionStorageService.get(token)
             response <- storagePerson match
               case Some(value) =>
                 AcceptCodeType.fromOrdinal(acceptCode.acceptCodeType) match
                   case AcceptCodeType.registration =>
-                    for{
-                      userService <- ZIO.service[PersonTrait]
-                      response <-
-                        if (value.acceptCode == acceptCode.acceptCode)
-                          for{
-                            userService <- ZIO.service[PersonTrait]
-                            person <- userService.addPerson(value.person.copy(is_confirm_email = true))
-                            _ <- service.updatePerson(token, person)
-                            response <- ZIO.from(person)
-                          }yield response
-                        else
-                          ZIO.from(
-                            HttpValidationResponse(false, List(
-                              HttpValidationFields("acceptCode", "Неверный код подтверждения")
-                            ))
-                          )
-                    }yield response
+                      if (value.acceptCode == acceptCode.acceptCode)
+                        for{
+                          person <- PersonService.addPerson(value.person.copy(is_confirm_email = true))
+                          _ <- SessionStorageService.updatePerson(token, person)
+                          response <- ZIO.from(person)
+                        }yield response
+                      else
+                        ZIO.from(
+                          HttpValidationResponse(false, List(
+                            HttpValidationFields("acceptCode", "Неверный код подтверждения")
+                          ))
+                        )
                   case AcceptCodeType.authorization =>
                     for{
-                      userService <- ZIO.service[PersonTrait]
                       email <- ZIO.fromOption(value.person.email).mapError(err => new Exception("В хранилище не найден email"))
-                      person <- userService.getPersonByEmail(email)
+                      person <- PersonService.getPersonByEmail(email)
                       _ <- ZIO.when(person.length > 1)(ZIO.fail(new Exception("С такой почтой несколько пользователей")))
                       response <- ZIO.from(person.head)
                     }yield response
@@ -133,27 +121,23 @@ object PersonRoute {
       .errorOut(jsonBody[HttpResponse])
       .zServerLogic((clientPerson,token) =>
         (
-          for {
-            sessionStorage <- ZIO.service[SessionStorageTrait]
-            service <- ZIO.service[PersonTrait]
-            response <- AuthType.fromOrdinal(clientPerson.authType) match
+          AuthType.fromOrdinal(clientPerson.authType) match
               case AuthType.passwordAuth =>
                 for{
                   email <- ZIO.fromOption(clientPerson.email).mapError(err => new Exception("Не ввели почту"))
                   password <- ZIO.fromOption(clientPerson.password).mapError(err => new Exception("Не ввели пароль"))
                   _ <- ZIO.when(!isValidEmail(email))(ZIO.fail(HttpValidationFields("email_authFormTI", RegistrationError.emailValidationError.message)))
-                  personByEmail <- service.getPersonByEmail(email)
+                  personByEmail <- PersonService.getPersonByEmail(email)
                   _ <- ZIO.when(personByEmail.isEmpty)(ZIO.fail(HttpValidationFields("email_authFormTI", "Пользователь с такой почтой не зарегистрирован")))
-                  passwordByEmail <- service.getPersonByEmail(email).map(_.head.password_hash)
+                  passwordByEmail <- PersonService.getPersonByEmail(email).map(_.head.password_hash)
                   _ <- ZIO.when(passwordByEmail.isEmpty)(ZIO.fail(HttpValidationFields("password_authFormTI","У пользователя не установлен пароль")))
                   _ <- ZIO.when(!isValidPassword(password))(ZIO.fail(HttpValidationFields("password_authFormTI",RegistrationError.passwordValidationError.message)))
-                  person <- service.authPerson(email,password)
-                  sessionStorage <- ZIO.service[SessionStorageTrait]
+                  person <- PersonService.authPerson(email,password)
                   token <- ZIO.from(UUID.randomUUID.toString)
-                  _ <- sessionStorage.put(token, StoragePerson(person.head, new Date().getTime))
+                  _ <- SessionStorageService.put(token, StoragePerson(person.head, new Date().getTime))
                   result <- if person.isEmpty
                   then ZIO.from(
-                      (HttpValidationResponse(false, 
+                      (HttpValidationResponse(false,
                         List(HttpValidationFields("email_authFormTI", "Пользователь с такой почтой не зарегистрирован"))
                       ),"", "")
                     )
@@ -167,7 +151,7 @@ object PersonRoute {
               case AuthType.emailAuth =>
                 for{
                   email <- ZIO.fromOption(clientPerson.email).mapError(err => new Exception("Не ввели почту"))
-                  token <- service.authPersonOnEmail(email)
+                  token <- PersonService.authPersonOnEmail(email)
                   result <- ZIO.from(
                     (HttpResponse(true, "Код подтверждения отправлен"), "", "")
                   )
@@ -177,13 +161,11 @@ object PersonRoute {
               )
               case AuthType.tokenAuth =>
                 for{
-                  service <- ZIO.service[SessionStorageTrait]
                   openToken <- ZIO.fromOption(token).mapError(err => new Exception("Не найден токен"))
-                  user <- service.get(openToken)
+                  user <- SessionStorageService.get(openToken)
                   result <- ZIO.fromOption(user).mapError(err => new Exception("Не найден пользователь"))
-                  _ <- service.updateTime(openToken)
+                  _ <- SessionStorageService.updateTime(openToken)
                 }yield (result.person.toClientPerson, openToken, "Token")
-          } yield response
         ).mapError(err => HttpResponse(false, err.getMessage))
       ),
     endpoint.post
@@ -200,18 +182,16 @@ object PersonRoute {
       .zServerLogic((setPassword,token) =>
         (
           for{
-            storage <- ZIO.service[SessionStorageTrait]
-            _ <- storage.updateTime(token)
-            currentPerson <- storage.get(token).flatMap(ZIO.fromOption(_)).mapError(ex => new Exception("Авторизируйтесь заново"))
-            personService <- ZIO.service[PersonTrait]
+            _ <- SessionStorageService.updateTime(token)
+            currentPerson <- SessionStorageService.get(token).flatMap(ZIO.fromOption(_)).mapError(ex => new Exception("Авторизируйтесь заново"))
             updatePass <- setPassword.oldPassword match
-              case Some(password) => personService.updatePassword(
+              case Some(password) => PersonService.updatePassword(
                 currentPerson.person.id,
                 setPassword.password,
                 setPassword.repeatPassword,
                 password
               )
-              case None => personService.setPassword(
+              case None => PersonService.setPassword(
                 currentPerson.person.id,
                 setPassword.password,
                 setPassword.repeatPassword
@@ -233,11 +213,9 @@ object PersonRoute {
       .zServerLogic((updatePersonInfo, token) =>
         (
           for{
-            storage <- ZIO.service[SessionStorageTrait]
-            _ <- storage.updateTime(token)
-            currentPerson <- storage.get(token).flatMap(ZIO.fromOption(_)).mapError(err => new Exception("Авторизируйтесь заново"))
-            personStorage <- ZIO.service[PersonTrait]
-            updatedRows <- personStorage.setPersonInfo(
+            _ <- SessionStorageService.updateTime(token)
+            currentPerson <- SessionStorageService.get(token).flatMap(ZIO.fromOption(_)).mapError(err => new Exception("Авторизируйтесь заново"))
+            updatedRows <- PersonService.setPersonInfo(
               currentPerson.person.id,
               updatePersonInfo.surname,
               updatePersonInfo.firstname,
@@ -251,4 +229,5 @@ object PersonRoute {
       )
   )
   val routes = ZioHttpInterpreter().toHttp(personRoute)
+  val endPointList = personRoute.map(_.endpoint)
 }

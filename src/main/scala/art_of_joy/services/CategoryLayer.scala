@@ -1,6 +1,6 @@
 package art_of_joy.services
 import art_of_joy.ctx
-import art_of_joy.services.interfaces.CategoryTrait
+import art_of_joy.services.interfaces.CategoryService
 import zio.{ZIO, ZLayer}
 import io.getquill.*
 import art_of_joy.model.category._
@@ -9,7 +9,7 @@ import javax.sql.DataSource
 object CategoryLayer {
   import ctx._
   val live = ZLayer.succeed(
-    new CategoryTrait {
+    new CategoryService {
       override def getFullCategoryList: ZIO[DataSource, Throwable, List[ClientCategory]] =
         for{
           categoryList <- ctx.run(

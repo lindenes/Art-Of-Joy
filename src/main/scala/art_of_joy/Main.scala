@@ -7,7 +7,7 @@ import zio.config.typesafe.TypesafeConfigProvider
 import zio.http.*
 import zio.http.netty.NettyConfig
 import art_of_joy.http.getRoutes
-import art_of_joy.services.interfaces.{CategoryTrait, SessionStorageTrait}
+import art_of_joy.services.interfaces.{CategoryService, SessionStorageService}
 import art_of_joy.services.*
 import art_of_joy.utils.Migration
 object Main extends ZIOAppDefault{
@@ -24,7 +24,7 @@ object Main extends ZIOAppDefault{
         _ <- Migration.createTables
         _ <- (
           for{
-            service <- ZIO.service[SessionStorageTrait]
+            service <- ZIO.service[SessionStorageService]
             inactiveUsers <- service.checkInactivePersons
             _ <- service.clearPersons(inactiveUsers)
           }yield ()
