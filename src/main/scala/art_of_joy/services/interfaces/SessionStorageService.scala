@@ -4,7 +4,7 @@ import art_of_joy.model.person.Person
 import art_of_joy.services.SessionStorageLayer.StoragePerson
 import zio.*
 
-trait SessionStorageTrait(ref: Ref[Map[String, StoragePerson]]) {
+trait SessionStorageService(ref: Ref[Map[String, StoragePerson]]) {
   def get(key: String): ZIO[Any, Nothing, Option[StoragePerson]]
   def put(key: String, data: StoragePerson): UIO[Unit]
   def updateTime(key: String): ZIO[Scope, Throwable, Unit]

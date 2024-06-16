@@ -5,7 +5,7 @@ import art_of_joy.model.person.{Person, RegPerson, SetPassword}
 import zio.*
 
 import javax.sql.DataSource
-trait PersonTrait {
+trait PersonService {
   def getAllPersons(startRow:Int, endRow:Option[Int]):ZIO[DataSource, Throwable, List[Person]]
   def getPersonByEmail(email:String):ZIO[DataSource,Throwable, List[Person]]
   def getPersonByID(personID:Long):ZIO[DataSource,Throwable, Person]
