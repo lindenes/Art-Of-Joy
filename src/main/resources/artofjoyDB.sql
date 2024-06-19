@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS person (
     CONSTRAINT user_pk PRIMARY KEY (id)
 );
 
-CREATE SEQUENCE IF NOT EXISTS category_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+CREATE SEQUENCE IF NOT EXISTS category_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS category (
 	id int default nextval('category_id_seq') NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS category (
 	CONSTRAINT category_pk PRIMARY KEY (id)
 );
 
-CREATE SEQUENCE IF NOT EXISTS subcategory_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+CREATE SEQUENCE IF NOT EXISTS subcategory_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS subcategory (
     id int default nextval('subcategory_id_seq') NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS subcategory (
 	CONSTRAINT subcategory_pk PRIMARY KEY (id)
 );
 
-CREATE SEQUENCE IF NOT EXISTS brand_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+CREATE SEQUENCE IF NOT EXISTS brand_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS brand (
     id int default nextval('brand_id_seq') NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS brand (
 	CONSTRAINT brand_pk PRIMARY KEY (id)
 );
 
-CREATE SEQUENCE IF NOT EXISTS product_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+CREATE SEQUENCE IF NOT EXISTS product_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS product (
     id int default nextval('product_id_seq') NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS product (
 	CONSTRAINT product_pk PRIMARY KEY (id)
 );
 
-CREATE SEQUENCE IF NOT EXISTS order_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+CREATE SEQUENCE IF NOT EXISTS order_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS `order` (
     id int default nextval('order_id_seq') NOT NULL,
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `order` (
 	CONSTRAINT order_pk PRIMARY KEY (id)
 );
 
-CREATE SEQUENCE IF NOT EXISTS address_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+CREATE SEQUENCE IF NOT EXISTS address_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS address (
     id int default nextval('address_id_seq') NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS address (
 	CONSTRAINT address_pk PRIMARY KEY (id)
 );
 
-CREATE SEQUENCE IF NOT EXISTS product_image_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+CREATE SEQUENCE IF NOT EXISTS product_image_id_seq INCREMENT BY 1 START WITH 1;
 
 create table IF NOT EXISTS product_image(
     id int default nextval('product_image_id_seq') NOT NULL,
@@ -97,7 +97,7 @@ create table IF NOT EXISTS product_image(
     CONSTRAINT product_image_pk PRIMARY KEY (id)
 );
 
-CREATE SEQUENCE IF NOT EXISTS product_group_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+CREATE SEQUENCE IF NOT EXISTS product_group_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS product_group(
     id int default nextval('product_group_id_seq') NOT NULL,
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS product_group(
     CONSTRAINT product_group_pk PRIMARY KEY (id)
 );
 
-CREATE SEQUENCE IF NOT EXISTS product_order_id_seq CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
+CREATE SEQUENCE IF NOT EXISTS product_order_id_seq  INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS product_order (
     id int default nextval('product_order_id_seq') NOT NULL,
