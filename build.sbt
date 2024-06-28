@@ -17,6 +17,13 @@ lazy val zioLib = Seq(
   "dev.zio" %% "zio-json"            % "0.6.2"
 )
 
+lazy val tapirLib = Seq(
+  "com.softwaremill.sttp.tapir" %% "tapir-zio"               % tapir,
+  "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server"   % tapir,
+  "com.softwaremill.sttp.tapir" %% "tapir-json-zio"          % tapir,
+  "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapir
+)
+
 lazy val root = (project in file("."))
   .settings(
     assembly / mainClass := Some("Main"),
@@ -37,10 +44,6 @@ lazy val root = (project in file("."))
       "javax.mail"           % "javax.mail-api"  %  mail,
       "com.sun.mail"         % "javax.mail"      %  mail,
       "org.apache.poi"       % "poi"             %  exel,
-      "org.apache.poi"       % "poi-ooxml"       %  exel,
-      "com.softwaremill.sttp.tapir" %% "tapir-zio" % tapir,
-      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapir,
-      "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapir,
-      "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapir
-    ) ++ zioLib
+      "org.apache.poi"       % "poi-ooxml"       %  exel
+    ) ++ zioLib ++ tapirLib
   )

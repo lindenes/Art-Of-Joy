@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS product (
 
 CREATE SEQUENCE IF NOT EXISTS order_id_seq INCREMENT BY 1 START WITH 1;
 
-CREATE TABLE IF NOT EXISTS `order` (
+CREATE TABLE IF NOT EXISTS "order" (
     id int default nextval('order_id_seq') NOT NULL,
 	person_id int NOT NULL,
 	address_id int NOT NULL,
@@ -101,7 +101,7 @@ CREATE SEQUENCE IF NOT EXISTS product_group_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS product_group(
     id int default nextval('product_group_id_seq') NOT NULL,
-    `name` varchar(50),
+    "name" varchar(50),
     CONSTRAINT product_group_pk PRIMARY KEY (id)
 );
 
