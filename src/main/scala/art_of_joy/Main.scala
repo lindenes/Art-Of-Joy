@@ -7,8 +7,12 @@ import zio.config.typesafe.TypesafeConfigProvider
 import zio.http.*
 import zio.http.netty.NettyConfig
 import art_of_joy.http.getRoutes
-import art_of_joy.services.interfaces.{CategoryService, SessionStorageService}
+import art_of_joy.repository.brand.BrandTableService
+import art_of_joy.repository.category.CategoryTableService
+import art_of_joy.repository.subcategory.SubCategoryTableService
+import art_of_joy.services.interfaces.SessionStorageService
 import art_of_joy.services.*
+import art_of_joy.services.category.CategoryService
 import art_of_joy.utils.Migration
 object Main extends ZIOAppDefault{
   
@@ -33,13 +37,16 @@ object Main extends ZIOAppDefault{
       }yield ExitCode.success
     )
       .provide(
+        CategoryService.live,
+        CategoryTableService.live,
+        SubCategoryTableService.live,
+        BrandTableService.live,
         Scope.default,
         Server.customized,
         ApplicationConfig.getHttpConfig,
         ApplicationConfig.getNettyConfig,
         DataSource.fromPrefix("db"),
         PersonLayer.live,
-        CategoryLayer.live,
         SessionStorageLayer.live,
         EmailServiceLayer.live,
         ExelLayer.live,
@@ -47,47 +54,3 @@ object Main extends ZIOAppDefault{
         ZClient.default
       )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//case class Category(id:Int, name:String)
-//object Main extends ZIOAppDefault{
-//
-//  val ctx = new PostgresZioJdbcContext(SnakeCase)
-//  import ctx._
-//  override def run =
-//    (for{
-//      data <- ZIO.from(
-//        quote{
-//          query[Category].insert(_.name -> "тестовая4")
-//        }
-//      )
-//      updatesql <- ZIO.from(
-//        quote{
-//          query[Category]
-//        }
-//      )
-//      _ <- ctx.run(data)
-//      sql <- ctx.run(updatesql)
-//      _ <- Console.printLine(sql)
-//    }yield "")
-//      .provide(
-//        DataSource.fromPrefix("db")
-//      )
-//}

@@ -12,12 +12,11 @@ import java.net.InetSocketAddress
 object ApplicationConfig {
 
   case class ApiEndPoint(host: String,threadSize:Int, port: Int, timeoutSec: Int, maxInitialLineLength:Int)
+  case class SmtpConfig(host:String, port:String, username:String, password:String, auth:Boolean, startTls:Boolean, email:String)
 
   private val appConfig = deriveConfig[ApiEndPoint].nested("api")
+  val smtpConfig = ZIO.config[SmtpConfig](deriveConfig[SmtpConfig].nested("SmtpConfig"))
 
-//  def getHttpConfig2 = read(
-//    appConfig from TypesafeConfigProvider.fromTypesafeConfig(com.typesafe.config.ConfigFactory.load())
-//  )
   def getHttpConfig =
     ZLayer.fromZIO(
       ZIO.config[ApiEndPoint](appConfig).map{data =>

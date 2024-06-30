@@ -1,9 +1,9 @@
 package art_of_joy.services
-import art_of_joy.model.SmtpConfig
 import art_of_joy.services.interfaces.EmailService
 import zio.*
 import zio.config.*
 import Config.*
+import art_of_joy.config.ApplicationConfig.smtpConfig
 import zio.config.magnolia.deriveConfig
 
 import javax.mail.*
@@ -13,11 +13,9 @@ import javax.mail
 object EmailServiceLayer {
   val live = ZLayer.succeed(
     new EmailService {
-      override def getSmtpConfig: ZIO[Any, Throwable, SmtpConfig] = ZIO.config[SmtpConfig](deriveConfig[SmtpConfig].nested("SmtpConfig"))
-
       override def sendMessage(title: String, body: String, emailReceiver:String): ZIO[Any, Throwable, Unit] =
         for{
-          config <- getSmtpConfig
+          config <- smtpConfig
           props <- ZIO.from{
             val props = new Properties()
             props.put("mail.smtp.auth", config.auth);
