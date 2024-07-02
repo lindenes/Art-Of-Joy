@@ -6,13 +6,15 @@ import art_of_joy.config.ApplicationConfig
 import zio.config.typesafe.TypesafeConfigProvider
 import zio.http.*
 import zio.http.netty.NettyConfig
-import art_of_joy.http.getRoutes
-import art_of_joy.repository.brand.BrandTableService
-import art_of_joy.repository.category.CategoryTableService
-import art_of_joy.repository.subcategory.SubCategoryTableService
-import art_of_joy.services.interfaces.SessionStorageService
-import art_of_joy.services.*
-import art_of_joy.services.category.CategoryService
+import art_of_joy.application.http.getRoutes
+import art_of_joy.repository.service.brand.BrandTableService
+import art_of_joy.repository.service.category.CategoryTableService
+import art_of_joy.repository.service.subcategory.SubCategoryTableService
+import art_of_joy.domain.*
+import art_of_joy.domain.service.category.CategoryService
+import art_of_joy.domain.service.exel.ExelService
+import art_of_joy.domain.service.interfaces.SessionStorageService
+import art_of_joy.repository.service.product.ProductTableService
 import art_of_joy.utils.Migration
 object Main extends ZIOAppDefault{
   
@@ -49,8 +51,8 @@ object Main extends ZIOAppDefault{
         PersonLayer.live,
         SessionStorageLayer.live,
         EmailServiceLayer.live,
-        ExelLayer.live,
-        ProductLayer.live,
+        ExelService.live,
+        ProductTableService.live,
         ZClient.default
       )
 }
