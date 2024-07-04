@@ -12,8 +12,10 @@ import art_of_joy.repository.service.category.CategoryTableService
 import art_of_joy.repository.service.subcategory.SubCategoryTableService
 import art_of_joy.domain.*
 import art_of_joy.domain.service.category.CategoryService
+import art_of_joy.domain.service.email.EmailService
 import art_of_joy.domain.service.exel.ExelService
-import art_of_joy.domain.service.interfaces.SessionStorageService
+import art_of_joy.domain.service.person.PersonService
+import art_of_joy.domain.service.session.{SessionStorage, SessionStorageService}
 import art_of_joy.repository.service.product.ProductTableService
 import art_of_joy.utils.Migration
 object Main extends ZIOAppDefault{
@@ -30,9 +32,8 @@ object Main extends ZIOAppDefault{
         _ <- Migration.createTables
         _ <- (
           for{
-            service <- ZIO.service[SessionStorageService]
-            inactiveUsers <- service.checkInactivePersons
-            _ <- service.clearPersons(inactiveUsers)
+            inactiveUsers <- SessionStorage.checkInactivePersons
+            _ <- SessionStorage.clearPersons(inactiveUsers)
           }yield ()
           ).repeat(Schedule.spaced(15.minute)).forkDaemon
         _ <- Server.install(getRoutes).map(port => println("Сервер запущен " + port)) *> ZIO.never
@@ -48,9 +49,9 @@ object Main extends ZIOAppDefault{
         ApplicationConfig.getHttpConfig,
         ApplicationConfig.getNettyConfig,
         DataSource.fromPrefix("db"),
-        PersonLayer.live,
-        SessionStorageLayer.live,
-        EmailServiceLayer.live,
+        SessionStorageService.live,
+        EmailService.live,
+        PersonService.live,
         ExelService.live,
         ProductTableService.live,
         ZClient.default

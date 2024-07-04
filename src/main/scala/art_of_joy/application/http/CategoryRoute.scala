@@ -4,7 +4,7 @@ import art_of_joy.domain.service.category.Category
 import art_of_joy.model.category.*
 import art_of_joy.model.http.HttpResponse
 import art_of_joy.repository.service.brand.BrandTable
-import art_of_joy.domain.service.interfaces.SessionStorageService
+import art_of_joy.domain.service.session.SessionStorage
 import zio.*
 import sttp.tapir.ztapir.*
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
@@ -22,7 +22,7 @@ object CategoryRoute {
         .zServerLogic( (token, categoryAdd) =>
           (
             for {
-              _ <- SessionStorageService.updateTime(token)
+              _ <- SessionStorage.updateTime(token)
               response <- Category.addCategories(categoryAdd)
             } yield HttpResponse(message = response)
           ).mapError(err => HttpResponse(false, err.getMessage))
