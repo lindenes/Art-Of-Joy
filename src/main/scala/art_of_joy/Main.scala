@@ -1,15 +1,20 @@
 package art_of_joy
+
 import io.getquill.*
 import io.getquill.jdbczio.Quill.DataSource
 import zio.*
-import art_of_joy.config.ApplicationConfig
 import zio.config.typesafe.TypesafeConfigProvider
 import zio.http.*
 import zio.http.netty.NettyConfig
-import art_of_joy.http.getRoutes
-import art_of_joy.services.interfaces.{CategoryService, SessionStorageService}
-import art_of_joy.services.*
+import art_of_joy.application.http.getRoutes
+import art_of_joy.repository.service.category.CategoryTableService
+import art_of_joy.domain.*
+import art_of_joy.domain.service.exel.ExelService
+import art_of_joy.domain.service.session.{SessionStorage, SessionStorageService}
+import art_of_joy.repository.service.person.PersonTableService
+import art_of_joy.repository.service.product.ProductTableService
 import art_of_joy.utils.Migration
+
 object Main extends ZIOAppDefault{
   
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
@@ -17,77 +22,31 @@ object Main extends ZIOAppDefault{
       TypesafeConfigProvider
         .fromResourcePath()
     )
-
+  
   override def run =
     (
       for{
         _ <- Migration.createTables
         _ <- (
           for{
-            service <- ZIO.service[SessionStorageService]
-            inactiveUsers <- service.checkInactivePersons
-            _ <- service.clearPersons(inactiveUsers)
+            inactiveUsers <- SessionStorage.checkInactivePersons
+            _ <- SessionStorage.clearPersons(inactiveUsers)
           }yield ()
           ).repeat(Schedule.spaced(15.minute)).forkDaemon
         _ <- Server.install(getRoutes).map(port => println("Сервер запущен " + port)) *> ZIO.never
       }yield ExitCode.success
     )
       .provide(
+        CategoryTableService.live,
         Scope.default,
         Server.customized,
         ApplicationConfig.getHttpConfig,
         ApplicationConfig.getNettyConfig,
         DataSource.fromPrefix("db"),
-        PersonLayer.live,
-        CategoryLayer.live,
-        SessionStorageLayer.live,
-        EmailServiceLayer.live,
-        ExelLayer.live,
-        ProductLayer.live,
+        SessionStorageService.live,
+        ExelService.live,
+        ProductTableService.live,
+        PersonTableService.live,
         ZClient.default
       )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//case class Category(id:Int, name:String)
-//object Main extends ZIOAppDefault{
-//
-//  val ctx = new PostgresZioJdbcContext(SnakeCase)
-//  import ctx._
-//  override def run =
-//    (for{
-//      data <- ZIO.from(
-//        quote{
-//          query[Category].insert(_.name -> "тестовая4")
-//        }
-//      )
-//      updatesql <- ZIO.from(
-//        quote{
-//          query[Category]
-//        }
-//      )
-//      _ <- ctx.run(data)
-//      sql <- ctx.run(updatesql)
-//      _ <- Console.printLine(sql)
-//    }yield "")
-//      .provide(
-//        DataSource.fromPrefix("db")
-//      )
-//}
