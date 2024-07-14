@@ -2,9 +2,9 @@ CREATE SEQUENCE IF NOT EXISTS person_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS person (
     id int default nextval('person_id_seq') NOT NULL,
-    surname varchar(50) NOT NULL,
-    firstname varchar(50) NOT NULL,
-    middlename varchar(50) NOT NULL,
+    surname varchar(50) NULL,
+    firstname varchar(50) NULL,
+    middlename varchar(50) NULL,
     phone varchar(20) NULL,
     email varchar(50) NOT NULL,
     password_hash varchar(80) NULL,

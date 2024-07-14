@@ -1,4 +1,4 @@
-package art_of_joy.model.`enum`
+package art_of_joy.domain.model.`enum`
 
 enum AcceptCodeType(val textValue:String):
   case registration extends AcceptCodeType("Регистрация")

@@ -1,12 +1,12 @@
 package art_of_joy.domain.service.exel
 
 import art_of_joy.domain.model.ExelProduct
+import art_of_joy.domain.model.`enum`.ExelField
 import zio.*
 import zio.http.*
 import java.io.ByteArrayInputStream
 import java.util.Base64
 import org.apache.poi.ss.usermodel.*
-import art_of_joy.model.`enum`.ExelField
 
 class ExelService extends Exel {
   def getProductFromExel(data: Array[Byte]): ZIO[Client & Scope, Throwable, List[ExelProduct]] = {

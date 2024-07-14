@@ -17,7 +17,7 @@ class ProductTableService extends ProductTable {
   override def getProductList(filters: ProductClientFilter): ZIO[DataSource, Throwable, List[ProductRow]] = ctx.run(
     dynamicQuerySchema[ProductRow](
       "product",
-      alias(_.subcategoryID, "subcategory_id"),
+      alias(_.subcategoryId, "subcategory_id"),
       alias(_.ruSize, "ru_size"),
       alias(_.articleWb, "article_wb"),
       alias(_.brandID, "brand_id"),
@@ -26,7 +26,7 @@ class ProductTableService extends ProductTable {
     )
       .filterOpt(filters.name.map(_ + "%"))((product, name) => quote( product.name.getOrElse("") like name))
       .filterOpt(filters.brandID.map(List(_)))((product, brand) => quote(brand.contains(product.brandID)))
-      .filterOpt(filters.subCategoryID.map(List(_)))((product, subCategory) => quote(subCategory.contains(product.subcategoryID)))
+      .filterOpt(filters.subCategoryID.map(List(_)))((product, subCategory) => quote(subCategory.contains(product.subcategoryId)))
       .filterOpt(filters.maxPrice)((product, maxPrice) => quote(product.price.getOrElse(0.toDouble) <= maxPrice))
       .filterOpt(filters.minPrice)((product, minPrice) => quote(product.price.getOrElse(0.toDouble) >= minPrice))
   )

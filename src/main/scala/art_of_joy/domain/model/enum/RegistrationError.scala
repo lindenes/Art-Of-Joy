@@ -1,4 +1,4 @@
-package art_of_joy.model.`enum`
+package art_of_joy.domain.model.`enum`
 
 enum RegistrationError(val message:String):
   case passwordValidationError extends RegistrationError("Пароль должен иметь хотя бы 1 заглавную букву и хотя бы 1 цифру")

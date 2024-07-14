@@ -1,6 +1,5 @@
 package art_of_joy.domain.service.session
-import art_of_joy.domain.model.StoragePerson
-import art_of_joy.repository.model.PersonRow
+import art_of_joy.domain.model.{Person, StoragePerson}
 import zio.*
 
 import java.util.Date
@@ -56,7 +55,7 @@ class SessionStorageService(ref:Ref[Map[String, StoragePerson]]) extends Session
       storage <- ref.update(_.updated(key, updatedPerson))
     } yield storage
 
-  override def updatePerson(key: String, person: PersonRow): ZIO[Scope, Throwable, Unit] =
+  override def updatePerson(key: String, person: Person): ZIO[Scope, Throwable, Unit] =
     for {
       storagePerson <- get(key)
       user <- ZIO.fromOption(storagePerson).mapError(err => new Exception("Not found user in storage"))

@@ -1,10 +1,10 @@
 package art_of_joy.application.http
 
+import art_of_joy.application.model.Http.HttpResponse
 import art_of_joy.application.model.ProductClientFilter
 import art_of_joy.domain.model.ExelProduct
 import art_of_joy.domain.service.exel.Exel
-import art_of_joy.model.http.HttpResponse
-import art_of_joy.model.product.{ExelBase64, Product}
+import art_of_joy.model.product.ExelBase64
 import art_of_joy.repository.model.ProductRow
 import art_of_joy.repository.service.product.ProductTable
 import art_of_joy.timestampSchema
