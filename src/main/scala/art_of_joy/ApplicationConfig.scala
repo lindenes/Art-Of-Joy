@@ -1,10 +1,10 @@
-package art_of_joy.config
+package art_of_joy
 
 import zio.*
-import zio.http.*
 import zio.config.*
 import zio.config.magnolia.deriveConfig
 import zio.config.typesafe.TypesafeConfigProvider
+import zio.http.*
 import zio.http.Server.RequestStreaming
 import zio.http.netty.NettyConfig
 

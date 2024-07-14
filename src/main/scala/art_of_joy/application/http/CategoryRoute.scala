@@ -1,16 +1,18 @@
 package art_of_joy.application.http
 
-import art_of_joy.domain.service.category.Category
-import art_of_joy.model.category.*
-import art_of_joy.model.http.HttpResponse
-import art_of_joy.repository.service.brand.BrandTable
+
+import art_of_joy.application.model.CategoryApplication.*
+import art_of_joy.application.model.Http.*
+import art_of_joy.domain.service.CategoryService
 import art_of_joy.domain.service.session.SessionStorage
+import art_of_joy.repository.service.category.CategoryTable
 import zio.*
 import sttp.tapir.ztapir.*
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import sttp.tapir.generic.auto.*
 import sttp.tapir.json.zio.*
 import art_of_joy.utils.*
+
 object CategoryRoute {
   val categoryRoute = List(
       endpoint.post
@@ -23,24 +25,37 @@ object CategoryRoute {
           (
             for {
               _ <- SessionStorage.updateTime(token)
-              response <- Category.addCategories(categoryAdd)
+              response <- 
+                CategoryService.addCategories(categoryAdd)
+                  .map(addedData =>
+                    s"Добавлено ${addedData.length} категорий и ${addedData.flatMap(_._2).length} подкатегории"
+                  )
             } yield HttpResponse(message = response)
           ).mapError(err => HttpResponse(false, err.getMessage))
         ),
       endpoint.get
         .in("category")
-        .out(jsonBody[List[FullCategory]])
+        .out(jsonBody[List[CategoryHttp]])
         .errorOut(jsonBody[HttpResponse])
         .zServerLogic( _ =>
-          Category.getFullCategoryList
+          CategoryService.getCategories
+            .map(categoryList => 
+              categoryList.map(category => 
+                CategoryHttp(
+                  category.id, category.name,
+                  category.subCategories.map(sub => SubCategoryHttp(sub.id, sub.name, sub.categoryId))
+                )
+              )
+            )
             .mapError(err => HttpResponse(false, err.getMessage))
         ),
       endpoint.get
         .in("brand")
-        .out(jsonBody[List[BrandRow]])
+        .out(jsonBody[List[BrandHttp]])
         .errorOut(jsonBody[HttpResponse])
         .zServerLogic(_ =>
-          BrandTable.getBrand
+          CategoryTable.getBrands
+            .map(_.map(b => BrandHttp(b.id, b.name)))
             .mapError(err => HttpResponse(false, err.getMessage))
         )
     )

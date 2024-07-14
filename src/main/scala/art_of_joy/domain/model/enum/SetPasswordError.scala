@@ -1,4 +1,4 @@
-package art_of_joy.model.`enum`
+package art_of_joy.domain.model.`enum`
 
 enum SetPasswordError(val message:String):
   case notEqual extends SetPasswordError("Пароли не совпадают")

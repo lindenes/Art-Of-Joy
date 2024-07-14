@@ -1,4 +1,4 @@
-package art_of_joy.model.`enum`
+package art_of_joy.domain.model.`enum`
 
 enum ExelField(val fieldName:String):
   case article extends ExelField("Артикул продавца")

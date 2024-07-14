@@ -1,8 +1,8 @@
 package art_of_joy.domain.service.session
-import art_of_joy.domain.model.StoragePerson
-import art_of_joy.domain.service.person.Person
-import art_of_joy.repository.model.PersonRow
+
+import art_of_joy.domain.model.{Person, StoragePerson}
 import zio.*
+
 trait SessionStorage {
   def get(key: String): ZIO[Any, Nothing, Option[StoragePerson]]
 
@@ -12,7 +12,7 @@ trait SessionStorage {
 
   def setAcceptCode(key: String, code: String): ZIO[Scope, Throwable, Unit]
 
-  def updatePerson(key: String, person: PersonRow): ZIO[Scope, Throwable, Unit]
+  def updatePerson(key: String, person: Person): ZIO[Scope, Throwable, Unit]
 
   def clearAcceptCode(key: String): ZIO[Scope, Throwable, Unit]
 
@@ -33,7 +33,7 @@ object SessionStorage{
 
   def setAcceptCode(key: String, code: String) = ZIO.serviceWithZIO[SessionStorage](_.setAcceptCode(key, code))
 
-  def updatePerson(key: String, person: PersonRow) = ZIO.serviceWithZIO[SessionStorage](_.updatePerson(key, person))
+  def updatePerson(key: String, person: Person) = ZIO.serviceWithZIO[SessionStorage](_.updatePerson(key, person))
 
   def clearAcceptCode(key: String) = ZIO.serviceWithZIO[SessionStorage](_.clearAcceptCode(key))
 

@@ -3,7 +3,7 @@ package art_of_joy.domain.service.email
 import zio.*
 import zio.config.*
 import Config.*
-import art_of_joy.config.ApplicationConfig.smtpConfig
+import art_of_joy.ApplicationConfig.smtpConfig
 import zio.config.magnolia.deriveConfig
 
 import javax.mail.*
@@ -11,7 +11,7 @@ import javax.mail.internet.*
 import java.util.Properties
 import javax.mail
 
-class EmailService extends Email {
+object EmailService {
   def sendMessage(title: String, body: String, emailReceiver: String): ZIO[Any, Throwable, Unit] =
     for {
       config <- smtpConfig
@@ -42,7 +42,4 @@ class EmailService extends Email {
         Transport.send(message)
       )
     } yield {}
-}
-object EmailService{
-  val live = ZLayer.succeed(EmailService())
 }

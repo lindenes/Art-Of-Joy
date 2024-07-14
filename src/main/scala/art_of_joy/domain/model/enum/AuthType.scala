@@ -1,4 +1,4 @@
-package art_of_joy.model.`enum`
+package art_of_joy.domain.model.`enum`
 
 enum AuthType(val textValue:String):
   case passwordAuth extends AuthType("Вход по паролю")
