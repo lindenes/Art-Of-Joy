@@ -48,7 +48,7 @@ object PersonService {
     for {
       emailValid <- ZIO.from(isValidEmail(email))
       isEmailBusy <- PersonTable.getPersonByEmail(email).map(_.headOption.isEmpty)
-      result <- ZIO.ifZIO(ZIO.from(isEmailBusy))(
+      result <- ZIO.ifZIO(ZIO.from(!isEmailBusy))(
         onTrue = ZIO.from(
           getRegistrationError(true, emailValid, isEmailBusy, true)
         ).map(Right(_)),
