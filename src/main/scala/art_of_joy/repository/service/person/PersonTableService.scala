@@ -30,11 +30,11 @@ class PersonTableService extends PersonTable {
   override def addPerson(person: Person): ZIO[DataSource, Throwable, PersonRow] = 
   ctx.run(
     quote {
-      query[PersonRow].insert(_.phone -> lift(person.phone),
+      personSchema.insert(_.phone -> lift(person.phone),
         _.role -> lift(Role.user.ordinal),
         _.email -> lift(person.email),
         _.passwordHash -> lift(person.passwordHash),
-        _.isConfirmEmail -> false,
+        _.isConfirmEmail -> lift(person.isConfirmEmail),
         _.isConfirmPhone -> false
       ).returning(p => p)
     }
@@ -47,13 +47,13 @@ class PersonTableService extends PersonTable {
           _ <- ZIO.when(value < startRow)(ZIO.fail(new Exception("endRow должен быть больше startRow")))
           users <- ctx.run(
             quote {
-              query[PersonRow].drop(lift(startRow)).take(lift(value))
+              personSchema.drop(lift(startRow)).take(lift(value))
             }
           )
         } yield users
       case None => ctx.run(
         quote {
-          query[PersonRow]
+          personSchema
         }
       )
       
