@@ -1,15 +1,17 @@
 package art_of_joy.domain.service.exel
 
+import art_of_joy.domain.model.Errors.{DomainError, LoadImageError}
 import art_of_joy.domain.model.ExelProduct
 import art_of_joy.domain.model.`enum`.ExelField
 import zio.*
 import zio.http.*
+
 import java.io.ByteArrayInputStream
 import java.util.Base64
 import org.apache.poi.ss.usermodel.*
 
 class ExelService extends Exel {
-  def getProductFromExel(data: Array[Byte]): ZIO[Client & Scope, Throwable, List[ExelProduct]] = {
+  def getProductFromExel(data: Array[Byte]): ZIO[Client & Scope, DomainError, List[ExelProduct]] = {
     val inputStream = new ByteArrayInputStream(data)
     val sheet = WorkbookFactory.create(inputStream).getSheetAt(0)
     inputStream.close()
@@ -27,7 +29,7 @@ class ExelService extends Exel {
         ).map { row =>
         for {
           media <- fieldPositions.find(_._1 == ExelField.mediaFile).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue.split(";"))) match
-            case None => ZIO.from(Array.empty[String])
+            case None => ZIO.succeed(Array.empty[String])
             case Some(value) => loadImage(value)
         } yield ExelProduct(
           fieldPositions.find(_._1 == ExelField.article).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue)),
@@ -48,17 +50,18 @@ class ExelService extends Exel {
           media
         )
       }
-    ).map(_.toList)
+    )
+      .map(_.toList)
   }
 
-  def loadImage(imageUrl: Array[String]): ZIO[Client & Scope, Throwable, Array[String]] =
+  def loadImage(imageUrl: Array[String]): ZIO[Client & Scope, DomainError, Array[String]] =
     ZIO.collectAllPar(imageUrl.map(url =>
-      for {
-        response <- ZClient.request(Request.get(url))
-        body <- response.body.asArray.map(Base64.getEncoder.encodeToString)
-      } yield body
-    )
-    )
+        for {
+          response <- ZClient.request(Request.get(url))
+          body <- response.body.asArray.map(Base64.getEncoder.encodeToString)
+        } yield body
+      )
+    ).mapError(ex => LoadImageError(exception = ex))
 
 }
 object ExelService{

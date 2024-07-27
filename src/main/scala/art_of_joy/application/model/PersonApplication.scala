@@ -19,7 +19,7 @@ object PersonApplication {
     implicit val encoder: JsonEncoder[PersonHttp] = DeriveJsonEncoder.gen[PersonHttp]
   }
 
-  case class AuthPerson(email: Option[String], password: Option[String], phone: Option[String], authType: Int)
+  case class AuthPerson(email: Option[String], password: Option[String], phone: Option[String])
 
   object AuthPerson {
     implicit val decoder: JsonDecoder[AuthPerson] = DeriveJsonDecoder.gen[AuthPerson]

@@ -2,6 +2,7 @@ package art_of_joy.domain.service
 
 import art_of_joy.application.model.CategoryApplication.CategoryAdd
 import art_of_joy.domain.model.CategoryDomain.*
+import art_of_joy.domain.model.Errors.DomainError
 import art_of_joy.repository.model.{CategoryRow, SubCategoryRow}
 import art_of_joy.repository.service.category.CategoryTable
 import zio.*
@@ -9,7 +10,7 @@ import zio.*
 import javax.sql.DataSource
 
 object CategoryService {
-  def addCategories(categories:List[CategoryAdd]): ZIO[DataSource & CategoryTable, Throwable, List[(CategoryRow, List[SubCategoryRow])]] =
+  def addCategories(categories:List[CategoryAdd]): ZIO[DataSource & CategoryTable, DomainError, List[(CategoryRow, List[SubCategoryRow])]] =
     ZIO.collectAll(
       categories.map(category =>
         for{
@@ -21,7 +22,7 @@ object CategoryService {
       )
     )
   
-  def getCategories: ZIO[DataSource & CategoryTable, Throwable, List[Category]] =
+  def getCategories: ZIO[DataSource & CategoryTable, DomainError, List[Category]] =
     CategoryTable.getCategoryWithSub.map(
       fullList =>
         fullList.map(_._1).distinct.map(category =>

@@ -1,8 +1,8 @@
-package art_of_joy.domain.service.person
+package art_of_joy.domain.service
 
-import art_of_joy.application.model.Http.HttpValidationFields
 import art_of_joy.application.model.PersonApplication.PersonHttp
 import art_of_joy.ctx
+import art_of_joy.domain.model.Errors._
 import art_of_joy.domain.model.`enum`.{RegistrationError, Role, SetPasswordError}
 import art_of_joy.domain.model.{Person, StoragePerson}
 import art_of_joy.domain.service.email.EmailService
@@ -24,7 +24,7 @@ object PersonService {
       (emailValid, "email_regFormTI", RegistrationError.emailValidationError),
       (emailChecker, "email_regFormTI", RegistrationError.emailCheckerError),
       (phoneChecker, "phone_regFormTI", RegistrationError.phoneCheckerError)
-    ).collect { case (false, fieldName, msg) => HttpValidationFields(fieldName, msg.message) }
+    ).collect { case (false, fieldName, msg) => ValidationFields(fieldName, msg.message) }
 
   private def getPasswordError(repeatValid: Boolean, passwordValid: Boolean, isOldEqual: Boolean, oldEqualNewValid: Boolean) =
     List(
@@ -32,9 +32,9 @@ object PersonService {
       (passwordValid, "password_userInfoFormTI", RegistrationError.passwordValidationError.message),
       (isOldEqual, "oldPassword_userInfoFormTI", "Неверный старый пароль"),
       (oldEqualNewValid, "oldPassword_userInfoFormTI", "Новый пароль совпадает со старым")
-    ).collect { case (false, fieldName, msg) => HttpValidationFields(fieldName, msg) }
+    ).collect { case (false, fieldName, msg) => ValidationFields(fieldName, msg) }
   
-  def getAllPersons(startRow: Int, endRow: Option[Int]): ZIO[DataSource & PersonTable, Throwable, List[Person]] =
+  def getAllPersons(startRow: Int, endRow: Option[Int]): ZIO[DataSource & PersonTable, DomainError, List[Person]] =
     PersonTable.getAllPersons(startRow, endRow)
       .map(_.map(person => 
         Person(
@@ -44,36 +44,36 @@ object PersonService {
         )
       ))
 
-  def emailRegistration(email: String): ZIO[SessionStorage & DataSource & PersonTable, Throwable, Either[String, List[HttpValidationFields]]] =
+  def emailRegistration(email: String): ZIO[SessionStorage & DataSource & PersonTable, DomainError, String] =
     for {
-      emailValid <- ZIO.from(isValidEmail(email))
-      isEmailBusy <- PersonTable.getPersonByEmail(email).map(_.headOption.isEmpty)
-      result <- ZIO.ifZIO(ZIO.from(!isEmailBusy))(
-        onTrue = ZIO.from(
-          getRegistrationError(true, emailValid, isEmailBusy, true)
-        ).map(Right(_)),
+      emailValid <- ZIO.succeed(isValidEmail(email))
+      isEmailBusy <- PersonTable.getPersonByEmail(email).map(_.headOption.nonEmpty)
+      result <- ZIO.ifZIO(ZIO.succeed(isEmailBusy))(
+        onTrue = ZIO.fail(ValidationError(
+          getRegistrationError(true, emailValid, isEmailBusy, true),
+          new Exception("validation fail")
+        )),
         onFalse =
-          (
-            for {
-              sessionID <- ZIO.from(UUID.randomUUID.toString)
-              acceptCode <- ZIO.succeed(generateCode)
-              _ <- EmailService.sendMessage("Подтверждение почты", s"Ваш код подтверждения $acceptCode", email)
-              _ <- SessionStorage.put(sessionID, StoragePerson(
-                Person(None, email, None, Role.user, None,None, -1L, None, false, false),
-                new Date().getTime, acceptCode
-              ))
-            } yield sessionID
-            ).map(Left(_))
+          for {
+            sessionID <- ZIO.succeed(UUID.randomUUID.toString)
+            acceptCode <- ZIO.succeed(generateCode)
+            _ <- EmailService.sendMessage("Подтверждение почты", s"Ваш код подтверждения $acceptCode", email)
+            _ <- SessionStorage.put(sessionID, StoragePerson(
+              Person(None, email, None, Role.user, None,None, -1L, None, false, false),
+              new Date().getTime, acceptCode
+            ))
+          } yield sessionID
+            
       )
     } yield result
 
-  def phoneRegistration(phone: String): ZIO[SessionStorage, Throwable, Either[String, List[HttpValidationFields]]] = ???
+  def phoneRegistration(phone: String): ZIO[SessionStorage, DomainError, String] = ???
 
-  def authPersonOnEmail(email: String): ZIO[DataSource & SessionStorage, Throwable, String] = ???
+  def authPersonOnEmail(email: String): ZIO[DataSource & SessionStorage, DomainError, String] = ???
 
-  def setPassword(personId: Long, newPassword: String, repeatPassword: String): ZIO[DataSource & PersonTable, Throwable, Either[Long, List[HttpValidationFields]]] =
+  def setPassword(personId: Long, newPassword: String, repeatPassword: String): ZIO[DataSource & PersonTable, DomainError, Long] =
     for {
-      validationError <- ZIO.from(
+      validationError <- ZIO.succeed(
         getPasswordError(
           newPassword == repeatPassword,
           isValidPassword(newPassword),
@@ -83,17 +83,17 @@ object PersonService {
       )
       result <-
         if (validationError.isEmpty)
-          PersonTable.setPersonData(personId, Option(passToHash(newPassword))).map(Left(_))
+          PersonTable.setPersonData(personId, Option(passToHash(newPassword)))
         else
-          ZIO.from(validationError).map(Right(_))
+          ZIO.fail(ValidationError(validationError, new Exception("validation fail")))
     } yield result
   
 
-  def updatePassword(personId: Long, newPassword: String, repeatPassword: String, oldPassword: String): ZIO[DataSource & PersonTable, Throwable, Either[Long, List[HttpValidationFields]]] =
+  def updatePassword(personId: Long, newPassword: String, repeatPassword: String, oldPassword: String): ZIO[DataSource & PersonTable, DomainError, Long] =
     for {
       dbPersonPass <- PersonTable.getPersonById(personId).map(_.head)
-      newPassHash <- ZIO.from(passToHash(newPassword))
-      validationError <- ZIO.from(
+      newPassHash <- ZIO.succeed(passToHash(newPassword))
+      validationError <- ZIO.succeed(
         getPasswordError(
           newPassword == repeatPassword,
           isValidPassword(newPassword),
@@ -101,15 +101,23 @@ object PersonService {
           newPassword != oldPassword
         )
       )
-      result <-
+      updatedData <-
         if (validationError.isEmpty)
-          PersonTable.setPersonData(personId, Option(newPassHash)).map(Left(_))
+          PersonTable.setPersonData(personId, Option(newPassHash))
         else
-          ZIO.from(validationError).map(Right(_))
+          ZIO.fail(ValidationError(validationError, new Exception("validation fail")))
+      result <- 
+        if updatedData == 1 then ZIO.succeed(updatedData)
+        else ZIO.fail(NotFoundError(exception = new Exception("not found data in database")))
     } yield result
 
-  def setPersonInfo(id: Long, surname: String, firstname: String, middleName: Option[String]): ZIO[DataSource & PersonTable, Throwable, Long] =
-    PersonTable.setPersonData(id, None, Option(surname), Option(firstname), middleName)
+  def setPersonInfo(id: Long, surname: String, firstname: String, middleName: Option[String]): ZIO[DataSource & PersonTable, DomainError, Long] =
+    for{
+      updatedData <- PersonTable.setPersonData(id, None, Option(surname), Option(firstname), middleName)
+      result <-
+        if updatedData == 1 then ZIO.succeed(updatedData)
+        else ZIO.fail(NotFoundError(exception = new Exception("not found data in database")))
+    }yield result
     
   def addPerson(person:Person) = 
     PersonTable.addPerson(person).map(person =>
@@ -120,7 +128,7 @@ object PersonService {
       )
     )
   
-  def getPersonByEmail(email:String): ZIO[DataSource & PersonTable, Throwable, List[Person]] =
+  def getPersonByEmail(email:String): ZIO[DataSource & PersonTable, DomainError, List[Person]] =
     PersonTable.getPersonByEmail(email)
       .map(_.map(person => 
         Person(

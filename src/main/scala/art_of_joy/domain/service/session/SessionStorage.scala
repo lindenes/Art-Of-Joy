@@ -1,5 +1,6 @@
 package art_of_joy.domain.service.session
 
+import art_of_joy.domain.model.Errors.DomainError
 import art_of_joy.domain.model.{Person, StoragePerson}
 import zio.*
 
@@ -8,19 +9,19 @@ trait SessionStorage {
 
   def put(key: String, data: StoragePerson): UIO[Unit]
 
-  def updateTime(key: String): ZIO[Scope, Throwable, Unit]
+  def updateTime(key: String): ZIO[Scope, DomainError, Unit]
 
-  def setAcceptCode(key: String, code: String): ZIO[Scope, Throwable, Unit]
+  def setAcceptCode(key: String, code: String): ZIO[Scope, DomainError, Unit]
 
-  def updatePerson(key: String, person: Person): ZIO[Scope, Throwable, Unit]
+  def updatePerson(key: String, person: Person): ZIO[Scope, DomainError, Unit]
 
-  def clearAcceptCode(key: String): ZIO[Scope, Throwable, Unit]
+  def clearAcceptCode(key: String): ZIO[Scope, DomainError, Unit]
 
   def clearPerson(key: String): UIO[Unit]
 
   def clearPersons(key: List[String]): UIO[Unit]
 
-  def checkInactivePersons: ZIO[Scope, Throwable, List[String]]
+  def checkInactivePersons: ZIO[Scope, DomainError, List[String]]
 
   def checkStorage: UIO[Map[String, StoragePerson]]
 }

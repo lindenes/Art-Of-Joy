@@ -1,4 +1,5 @@
 package art_of_joy.domain.service.session
+import art_of_joy.domain.model.Errors._
 import art_of_joy.domain.model.{Person, StoragePerson}
 import zio.*
 
@@ -6,7 +7,7 @@ import java.util.Date
 
 class SessionStorageService(ref:Ref[Map[String, StoragePerson]]) extends SessionStorage {
 
-  private def checkExpired(userList: Map[String, StoragePerson]): ZIO[Scope, Throwable, List[String]] = {
+  private def checkExpired(userList: Map[String, StoragePerson]): ZIO[Scope, DomainError, List[String]] = {
     val currentTime = new Date().getTime
 
     val expiredUsers = userList.collect {
@@ -21,11 +22,11 @@ class SessionStorageService(ref:Ref[Map[String, StoragePerson]]) extends Session
 
   override def checkStorage: UIO[Map[String, StoragePerson]] = ref.get
 
-  override def updateTime(key: String): ZIO[Scope, Throwable, Unit] =
+  override def updateTime(key: String): ZIO[Scope, DomainError, Unit] =
     for {
       storagePerson <- get(key)
-      user <- ZIO.fromOption(storagePerson).mapError(err => new Exception("Not found user in storage"))
-      updatedUser <- ZIO.from(user.copy(lastVisitTime = new Date().getTime))
+      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError(exception = new Exception("Not found user in storage")))
+      updatedUser <- ZIO.succeed(user.copy(lastVisitTime = new Date().getTime))
       storage <- ref.update(_.updated(key, updatedUser))
     } yield storage
 
@@ -33,33 +34,33 @@ class SessionStorageService(ref:Ref[Map[String, StoragePerson]]) extends Session
 
   override def clearPersons(key: List[String]): UIO[Unit] = ref.update(_.--(key))
 
-  override def checkInactivePersons: ZIO[Scope, Throwable, List[String]] =
+  override def checkInactivePersons: ZIO[Scope, DomainError, List[String]] =
     for {
       persons <- ref.get
       inactiveUsers <- checkExpired(persons)
     } yield inactiveUsers
 
-  override def setAcceptCode(key: String, code: String): ZIO[Scope, Throwable, Unit] =
+  override def setAcceptCode(key: String, code: String): ZIO[Scope, DomainError, Unit] =
     for {
       storagePerson <- get(key)
-      user <- ZIO.fromOption(storagePerson).mapError(err => new Exception("Not found user in storage"))
-      updatedPerson <- ZIO.from(user.copy(acceptCode = code))
+      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError(exception = new Exception("Not found user in storage")))
+      updatedPerson <- ZIO.succeed(user.copy(acceptCode = code))
       storage <- ref.update(_.updated(key, updatedPerson))
     } yield storage
 
-  override def clearAcceptCode(key: String): ZIO[Scope, Throwable, Unit] =
+  override def clearAcceptCode(key: String): ZIO[Scope, DomainError, Unit] =
     for {
       storagePerson <- get(key)
-      user <- ZIO.fromOption(storagePerson).mapError(err => new Exception("Not found user in storage"))
-      updatedPerson <- ZIO.from(user.copy(acceptCode = ""))
+      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError(exception = new Exception("Not found user in storage")))
+      updatedPerson <- ZIO.succeed(user.copy(acceptCode = ""))
       storage <- ref.update(_.updated(key, updatedPerson))
     } yield storage
 
-  override def updatePerson(key: String, person: Person): ZIO[Scope, Throwable, Unit] =
+  override def updatePerson(key: String, person: Person): ZIO[Scope, DomainError, Unit] =
     for {
       storagePerson <- get(key)
-      user <- ZIO.fromOption(storagePerson).mapError(err => new Exception("Not found user in storage"))
-      updatedPerson <- ZIO.from(user.copy(person = person))
+      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError(exception = new Exception("Not found user in storage")))
+      updatedPerson <- ZIO.succeed(user.copy(person = person))
       storage <- ref.update(_.updated(key, updatedPerson))
     } yield storage
 }
