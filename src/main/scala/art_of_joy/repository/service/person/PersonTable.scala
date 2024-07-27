@@ -1,5 +1,6 @@
 package art_of_joy.repository.service.person
 
+import art_of_joy.domain.model.Errors.DomainError
 import art_of_joy.domain.model.Person
 import art_of_joy.repository.model.PersonRow
 import zio.*
@@ -7,12 +8,12 @@ import zio.*
 import javax.sql.DataSource
 
 trait PersonTable {
-  def getPersonByEmail(email: String): ZIO[DataSource, Throwable, List[PersonRow]]
-  def getPersonByPhone(number:String): ZIO[DataSource, Throwable, List[PersonRow]]
-  def getPersonById(personId: Long): ZIO[DataSource, Throwable, List[PersonRow]]
-  def addPerson(person: Person): ZIO[DataSource, Throwable, PersonRow]
-  def getAllPersons(startRow: Int, endRow: Option[Int]): ZIO[DataSource, Throwable, List[PersonRow]]
-  def setPersonData(id:Long, passwordHash:Option[String], surname:Option[String], firstname:Option[String], middleName:Option[String]): ZIO[DataSource, Throwable, Long]
+  def getPersonByEmail(email: String): ZIO[DataSource, DomainError, List[PersonRow]]
+  def getPersonByPhone(number:String): ZIO[DataSource, DomainError, List[PersonRow]]
+  def getPersonById(personId: Long): ZIO[DataSource, DomainError, List[PersonRow]]
+  def addPerson(person: Person): ZIO[DataSource, DomainError, PersonRow]
+  def getAllPersons(startRow: Int, endRow: Option[Int]): ZIO[DataSource, DomainError, List[PersonRow]]
+  def setPersonData(id:Long, passwordHash:Option[String], surname:Option[String], firstname:Option[String], middleName:Option[String]): ZIO[DataSource, DomainError, Long]
 }
 object PersonTable{
   def getPersonByEmail(email: String) =

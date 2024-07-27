@@ -1,64 +1,51 @@
 package art_of_joy.application.http
 
 
+import art_of_joy.Env
 import art_of_joy.application.model.CategoryApplication.*
-import art_of_joy.application.model.Http.*
-import art_of_joy.domain.service.CategoryService
-import art_of_joy.domain.service.session.SessionStorage
-import art_of_joy.repository.service.category.CategoryTable
+import art_of_joy.application.model.Errors.*
 import zio.*
 import sttp.tapir.ztapir.*
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import sttp.tapir.generic.auto.*
 import sttp.tapir.json.zio.*
 import art_of_joy.utils.*
+import sttp.model.*
+
+import javax.sql.DataSource
 
 object CategoryRoute {
-  val categoryRoute = List(
-      endpoint.post
-        .in("category")
-        .in(token)
-        .in(jsonBody[List[CategoryAdd]])
-        .out(jsonBody[HttpResponse])
-        .errorOut(jsonBody[HttpResponse])
-        .zServerLogic( (token, categoryAdd) =>
-          (
-            for {
-              _ <- SessionStorage.updateTime(token)
-              response <- 
-                CategoryService.addCategories(categoryAdd)
-                  .map(addedData =>
-                    s"Добавлено ${addedData.length} категорий и ${addedData.flatMap(_._2).length} подкатегории"
-                  )
-            } yield HttpResponse(message = response)
-          ).mapError(err => HttpResponse(false, err.getMessage))
-        ),
-      endpoint.get
-        .in("category")
-        .out(jsonBody[List[CategoryHttp]])
-        .errorOut(jsonBody[HttpResponse])
-        .zServerLogic( _ =>
-          CategoryService.getCategories
-            .map(categoryList => 
-              categoryList.map(category => 
-                CategoryHttp(
-                  category.id, category.name,
-                  category.subCategories.map(sub => SubCategoryHttp(sub.id, sub.name, sub.categoryId))
-                )
-              )
-            )
-            .mapError(err => HttpResponse(false, err.getMessage))
-        ),
-      endpoint.get
-        .in("brand")
-        .out(jsonBody[List[BrandHttp]])
-        .errorOut(jsonBody[HttpResponse])
-        .zServerLogic(_ =>
-          CategoryTable.getBrands
-            .map(_.map(b => BrandHttp(b.id, b.name)))
-            .mapError(err => HttpResponse(false, err.getMessage))
-        )
+  val baseEndpoint = endpoint
+    .errorOut(
+      oneOf[ApplicationError](
+        oneOfVariant(statusCode(StatusCode.BadGateway).and(jsonBody[HttpDatabaseError])),
+        oneOfVariant(statusCode(StatusCode.BadRequest).and(jsonBody[HttpError]))
+      )
     )
-  val routes = ZioHttpInterpreter().toHttp(categoryRoute)
-  val endPointList = categoryRoute.map(_.endpoint)
+  
+  val categoryAddEndpoint: ZServerEndpoint[Env & Scope & DataSource, Any] =
+    baseEndpoint.post
+      .in("category")
+      .in(token)
+      .in(jsonBody[List[CategoryAdd]])
+      .out(jsonBody[List[CategoryHttp]])
+      .zServerLogic((token, categoryAdd) => Handler.addCategory(token, categoryAdd))
+    
+  val getCategoryEndpoint: ZServerEndpoint[Env & Scope & DataSource, Any] =
+    baseEndpoint.get
+      .in("category")
+      .out(jsonBody[List[CategoryHttp]])
+      .zServerLogic(_ => Handler.getCategory)
+    
+  val getBrandEndpoint: ZServerEndpoint[Env & Scope & DataSource, Any] =
+    baseEndpoint.get
+      .in("brand")
+      .out(jsonBody[List[BrandHttp]])
+      .zServerLogic(_ => Handler.getBrand)
+    
+  val endpointList = List(
+    categoryAddEndpoint, getCategoryEndpoint, getBrandEndpoint
+  )
+  val routes = ZioHttpInterpreter().toHttp(endpointList)
+  val endPointList = endpointList.map(_.endpoint)
 }
