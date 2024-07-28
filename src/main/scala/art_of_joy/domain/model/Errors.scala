@@ -38,4 +38,9 @@ object Errors {
                              message:String = "Ошибка загрузки фотографии",
                              exception: Throwable
                            )extends DomainError
+
+  case class LoadExelDataError(
+                                message: String = "Ошибка обработки exel",
+                                exception: Throwable
+                              ) extends DomainError
 }

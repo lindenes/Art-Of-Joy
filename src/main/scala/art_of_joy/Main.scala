@@ -8,7 +8,6 @@ import zio.http.netty.NettyConfig
 import art_of_joy.application.http.getRoutes
 import art_of_joy.repository.service.category.CategoryTableService
 import art_of_joy.domain.*
-import art_of_joy.domain.service.exel.ExelService
 import art_of_joy.domain.service.session.{SessionStorage, SessionStorageService}
 import art_of_joy.repository.service.person.PersonTableService
 import art_of_joy.repository.service.product.ProductTableService
@@ -38,9 +37,7 @@ object Main extends ZIOAppDefault{
         ApplicationConfig.smtpConfig,
         DataSource.fromPrefix("db"),
         SessionStorageService.live,
-        ExelService.live,
         ProductTableService.live,
-        PersonTableService.live,
-        ZClient.default
+        PersonTableService.live
       )
 }

@@ -7,9 +7,8 @@ import art_of_joy.application.model.PersonApplication.*
 import art_of_joy.application.model.ProductClientFilter
 import art_of_joy.domain.model.Errors.*
 import art_of_joy.domain.model.StoragePerson
-import art_of_joy._
-import art_of_joy.domain.service.exel.Exel
-import art_of_joy.domain.service.{CategoryService, PersonService}
+import art_of_joy.*
+import art_of_joy.domain.service.{CategoryService, ExelOperation, PersonService}
 import art_of_joy.domain.service.session.SessionStorage
 import art_of_joy.model.product.ExelBase64
 import art_of_joy.repository.service.category.CategoryTable
@@ -281,7 +280,7 @@ object Handler {
       }
 
   def parseExel(exel:ExelBase64) =
-    Exel.getProductFromExel(Base64.getDecoder.decode(exel.exelData))
+    ExelOperation.getProductFromExel(Base64.getDecoder.decode(exel.exelData))
       .mapError{
         case er:LoadImageError => HttpExelLoadError(applicationMessage = er.exception.getMessage)
         case _ => HttpError(applicationMessage = "unknown error")
