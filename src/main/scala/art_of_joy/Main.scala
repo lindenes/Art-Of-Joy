@@ -3,7 +3,6 @@ package art_of_joy
 import io.getquill.*
 import io.getquill.jdbczio.Quill.DataSource
 import zio.*
-import zio.config.typesafe.TypesafeConfigProvider
 import zio.http.*
 import zio.http.netty.NettyConfig
 import art_of_joy.application.http.getRoutes
@@ -17,12 +16,6 @@ import art_of_joy.utils.Migration
 
 object Main extends ZIOAppDefault{
   
-  override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
-    Runtime.setConfigProvider(
-      TypesafeConfigProvider
-        .fromResourcePath()
-    )
-  
   override def run =
     (
       for{
@@ -33,15 +26,16 @@ object Main extends ZIOAppDefault{
             _ <- SessionStorage.clearPersons(inactiveUsers)
           }yield ()
           ).repeat(Schedule.spaced(15.minute)).forkDaemon
-        _ <- Server.install(getRoutes).map(port => println("Сервер запущен " + port)) *> ZIO.never
+        _ <- Server.install(getRoutes).flatMap(port => ZIO.log("server start on port " + port)) *> ZIO.never
       }yield ExitCode.success
     )
       .provide(
         CategoryTableService.live,
         Scope.default,
         Server.customized,
-        ApplicationConfig.getHttpConfig,
-        ApplicationConfig.getNettyConfig,
+        ApplicationConfig.httpConfig,
+        ApplicationConfig.nettyConfig,
+        ApplicationConfig.smtpConfig,
         DataSource.fromPrefix("db"),
         SessionStorageService.live,
         ExelService.live,

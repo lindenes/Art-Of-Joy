@@ -24,5 +24,6 @@ package object http {
     ProductRoute.endPointList ++ PersonRoute.endPointList ++ CategoryRoute.endPointList,
     Info("Документация по api", "0.0.1")
   )
-  def getRoutes = (CategoryRoute.routes ++ PersonRoute.routes ++ ProductRoute.routes) @@ cors(config) ++ ZioHttpInterpreter().toHttp(getSwaggerDocRoutes)
+  def getRoutes = (CategoryRoute.routes ++ PersonRoute.routes ++ ProductRoute.routes)
+    @@ cors(config) @@ Middleware.requestLogging() ++ ZioHttpInterpreter().toHttp(getSwaggerDocRoutes)
 }

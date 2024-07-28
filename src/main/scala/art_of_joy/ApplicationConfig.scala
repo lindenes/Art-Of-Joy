@@ -11,36 +11,45 @@ import zio.http.netty.NettyConfig
 import java.net.InetSocketAddress
 object ApplicationConfig {
 
-  case class ApiEndPoint(host: String,threadSize:Int, port: Int, timeoutSec: Int, maxInitialLineLength:Int)
+  case class Api(host: String,threadSize:Int, port: Int, timeoutSec: Int, maxInitialLineLength:Int)
   case class SmtpConfig(host:String, port:String, username:String, password:String, auth:Boolean, startTls:Boolean, email:String)
-
-  private val appConfig = deriveConfig[ApiEndPoint].nested("api")
-  val smtpConfig = ZIO.config[SmtpConfig](deriveConfig[SmtpConfig].nested("SmtpConfig"))
-
-  def getHttpConfig =
+  
+  val httpConfig: ZLayer[Any, Config.Error, Server.Config] =
     ZLayer.fromZIO(
-      ZIO.config[ApiEndPoint](appConfig).map{data =>
-        Server.Config(
-          sslConfig = None,
-          address = new InetSocketAddress(data.host, data.port),
-          acceptContinue = false,
-          keepAlive = true,
-          requestDecompression = Decompression.No,
-          responseCompression = None,
-          requestStreaming = RequestStreaming.Disabled(1024 * 100),
-          maxHeaderSize = 8192,
-          logWarningOnFatalError = true,
-          gracefulShutdownTimeout = data.timeoutSec.second,
-          webSocketConfig = WebSocketConfig.default,
-          idleTimeout = None,
-          maxInitialLineLength = data.maxInitialLineLength
+      TypesafeConfigProvider.fromResourcePath()
+        .nested("api")
+        .load(deriveConfig[Api])
+        .map(config =>
+          Server.Config(
+            sslConfig = None,
+            address = new InetSocketAddress(config.host, config.port),
+            acceptContinue = false,
+            keepAlive = true,
+            requestDecompression = Decompression.No,
+            responseCompression = None,
+            requestStreaming = RequestStreaming.Disabled(1024 * 100),
+            maxHeaderSize = 8192,
+            logWarningOnFatalError = true,
+            gracefulShutdownTimeout = config.timeoutSec.second,
+            webSocketConfig = WebSocketConfig.default,
+            idleTimeout = None,
+            maxInitialLineLength = config.maxInitialLineLength
+          )
         )
-      }
     )
-  def getNettyConfig =
+    
+  val nettyConfig: ZLayer[Any, Config.Error, NettyConfig] =
     ZLayer.fromZIO(
-      ZIO.config[ApiEndPoint](appConfig).map{data => 
-        NettyConfig.default.maxThreads(data.threadSize)
-      }
+      TypesafeConfigProvider.fromResourcePath()
+        .nested("api")
+        .load(deriveConfig[Api])
+        .map(config => NettyConfig.default.maxThreads(config.threadSize))
+    )
+    
+  val smtpConfig: ZLayer[Any, Config.Error, SmtpConfig] =
+    ZLayer.fromZIO(
+      TypesafeConfigProvider.fromResourcePath()
+        .nested("SmtpConfig")
+        .load(deriveConfig[SmtpConfig])
     )
 }

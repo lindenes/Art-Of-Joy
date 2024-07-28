@@ -7,6 +7,7 @@ lazy val zio = "2.0.21"
 lazy val mail = "1.6.2"
 lazy val exel = "5.2.5"
 lazy val tapir = "1.10.8"
+lazy val zLog  = "2.3.0"
 lazy val zioLib = Seq(
   "dev.zio" %% "zio"                 % zio,
   "dev.zio" %% "zio-streams"         % zio,
@@ -14,7 +15,9 @@ lazy val zioLib = Seq(
   "dev.zio" %% "zio-config-magnolia" % zioConfig,
   "dev.zio" %% "zio-config-typesafe" % zioConfig,
   "dev.zio" %% "zio-http"            % "3.0.0-RC4",
-  "dev.zio" %% "zio-json"            % "0.6.2"
+  "dev.zio" %% "zio-json"            % "0.6.2",
+  "dev.zio" %% "zio-logging"         % zLog,
+  "dev.zio" %% "zio-logging-slf4j"   % zLog
 )
 
 lazy val tapirLib = Seq(

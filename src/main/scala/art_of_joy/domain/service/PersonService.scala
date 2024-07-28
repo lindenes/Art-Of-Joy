@@ -3,9 +3,9 @@ package art_of_joy.domain.service
 import art_of_joy.application.model.PersonApplication.PersonHttp
 import art_of_joy.ctx
 import art_of_joy.domain.model.Errors._
-import art_of_joy.domain.model.`enum`.{RegistrationError, Role, SetPasswordError}
+import art_of_joy._
 import art_of_joy.domain.model.{Person, StoragePerson}
-import art_of_joy.domain.service.email.EmailService
+import art_of_joy.domain.service.EmailService
 import art_of_joy.domain.service.session.SessionStorage
 import art_of_joy.repository.model.PersonRow
 import art_of_joy.repository.service.person.PersonTable
@@ -44,13 +44,13 @@ object PersonService {
         )
       ))
 
-  def emailRegistration(email: String): ZIO[SessionStorage & DataSource & PersonTable, DomainError, String] =
+  def emailRegistration(email: String): ZIO[Env, DomainError, String] =
     for {
       emailValid <- ZIO.succeed(isValidEmail(email))
       isEmailBusy <- PersonTable.getPersonByEmail(email).map(_.headOption.nonEmpty)
       result <- ZIO.ifZIO(ZIO.succeed(isEmailBusy))(
         onTrue = ZIO.fail(ValidationError(
-          getRegistrationError(true, emailValid, isEmailBusy, true),
+          getRegistrationError(true, emailValid, !isEmailBusy, true),
           new Exception("validation fail")
         )),
         onFalse =

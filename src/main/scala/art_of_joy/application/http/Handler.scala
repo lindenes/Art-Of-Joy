@@ -7,7 +7,7 @@ import art_of_joy.application.model.PersonApplication.*
 import art_of_joy.application.model.ProductClientFilter
 import art_of_joy.domain.model.Errors.*
 import art_of_joy.domain.model.StoragePerson
-import art_of_joy.domain.model.`enum`.*
+import art_of_joy._
 import art_of_joy.domain.service.exel.Exel
 import art_of_joy.domain.service.{CategoryService, PersonService}
 import art_of_joy.domain.service.session.SessionStorage
@@ -86,20 +86,20 @@ object Handler {
           for {
             email <- ZIO.fromOption(clientPerson.email).mapError(_ => HttpError("Нужно указать почту", "not found phone or email"))
             password <- ZIO.fromOption(clientPerson.password).mapError(_ => HttpError("Нужно указать пароль", "not found password"))
-            _ <- ZIO.when(!isValidEmail(email))(ZIO.fail(HttpValidationFields("email_authFormTI", RegistrationError.emailValidationError.message)))
+            _ <- ZIO.when(!isValidEmail(email))(ZIO.fail(HttpValidationError(List(HttpValidationFields("email_authFormTI", RegistrationError.emailValidationError.message)))))
             personByEmail <- PersonService.getPersonByEmail(email)
-            _ <- ZIO.when(personByEmail.isEmpty)(ZIO.fail(HttpValidationFields("email_authFormTI", "Пользователь с такой почтой не зарегистрирован")))
+            _ <- ZIO.when(personByEmail.isEmpty)(ZIO.fail(HttpValidationError(List(HttpValidationFields("email_authFormTI", "Пользователь с такой почтой не зарегистрирован")))))
             passwordByEmail <- PersonService.getPersonByEmail(email).map(_.head.passwordHash)
-            _ <- ZIO.when(passwordByEmail.isEmpty)(ZIO.fail(HttpValidationFields("password_authFormTI", "У пользователя не установлен пароль")))
-            _ <- ZIO.when(!isValidPassword(password))(ZIO.fail(HttpValidationFields("password_authFormTI", RegistrationError.passwordValidationError.message)))
+            _ <- ZIO.when(passwordByEmail.isEmpty)(ZIO.fail(HttpValidationError(List(HttpValidationFields("password_authFormTI", "У пользователя не установлен пароль")))))
+            _ <- ZIO.when(!isValidPassword(password))(ZIO.fail(HttpValidationError(List(HttpValidationFields("password_authFormTI", RegistrationError.passwordValidationError.message)))))
             person <- PersonService.authPerson(email, password)
             token <- ZIO.succeed(UUID.randomUUID.toString)
             _ <- SessionStorage.put(token, StoragePerson(person.head, new Date().getTime))
             result <- if person.isEmpty
             then ZIO.fail(
-                (HttpValidationError(
+                HttpValidationError(
                   List(HttpValidationFields("email_authFormTI", "Пользователь с такой почтой не зарегистрирован"))
-                ), "", "")
+                )
               )
             else
               ZIO.succeed(
@@ -184,6 +184,7 @@ object Handler {
       case error:DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
       case er:HttpError => er
       case er:Throwable => HttpError(applicationMessage = er.getMessage)
+      case _ => HttpError(applicationMessage = "unknown error")
     }
 
   def setPassword(setPassword: SetPassword, token:String): ZIO[Env & DataSource & Scope, ApplicationError, Unit] =
@@ -209,7 +210,7 @@ object Handler {
       case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
       case error: NotFoundError => HttpNotFoundUser(applicationMessage = error.exception.getMessage)
       case er: HttpError => er
-      case er:Throwable => HttpError(applicationMessage = er.getMessage)
+      case _ => HttpError(applicationMessage = "unknown error")
     }
 
   def setPersonInfo(updatePersonInfo: UpdatePersonInfo, token:String): ZIO[Env & DataSource & Scope, ApplicationError, Unit] =
@@ -229,7 +230,7 @@ object Handler {
       case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
       case error: NotFoundError => HttpNotFoundUser(applicationMessage = error.exception.getMessage)
       case er: HttpError => er
-      case er:Throwable => HttpError(applicationMessage = er.getMessage)
+      case _ => HttpError(applicationMessage = "unknown error")
     }
 
   def addCategory(token:String, categoryAdd:List[CategoryAdd]) =
@@ -251,7 +252,7 @@ object Handler {
     ).mapError{
       case error: StorageError => HttpError(error.message, error.exception.getMessage)
       case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
-      case er: Throwable => HttpError(applicationMessage = er.getMessage)
+      case _ => HttpError(applicationMessage = "unknown error")
     }
 
   def getCategory =
@@ -267,7 +268,7 @@ object Handler {
       .mapError{
         case error: StorageError => HttpError(error.message, error.exception.getMessage)
         case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
-        case er: Throwable => HttpError(applicationMessage = er.getMessage)
+        case _ => HttpError(applicationMessage = "unknown error")
       }
 
   def getBrand =
@@ -276,20 +277,20 @@ object Handler {
       .mapError{
         case error: StorageError => HttpError(error.message, error.exception.getMessage)
         case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
-        case er: Throwable => HttpError(applicationMessage = er.getMessage)
+        case _ => HttpError(applicationMessage = "unknown error")
       }
 
   def parseExel(exel:ExelBase64) =
     Exel.getProductFromExel(Base64.getDecoder.decode(exel.exelData))
       .mapError{
         case er:LoadImageError => HttpExelLoadError(applicationMessage = er.exception.getMessage)
-        case er:Throwable => HttpExelLoadError(applicationMessage = er.exception.getMessage)
+        case _ => HttpError(applicationMessage = "unknown error")
       }
 
   def getProduct(filter: ProductClientFilter) =
     ProductTable.getProductList(filter)
       .mapError{
         case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
-        case er: Throwable => HttpError(applicationMessage = er.getMessage)
+        case _ => HttpError(applicationMessage = "unknown error")
       }
 }

@@ -1,6 +1,6 @@
 package art_of_joy.repository.model
 
-import art_of_joy.domain.model.`enum`.Role
+import art_of_joy._
 import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
 
 import java.sql.Timestamp

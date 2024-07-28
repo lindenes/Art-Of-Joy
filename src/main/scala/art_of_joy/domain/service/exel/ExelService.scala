@@ -2,7 +2,7 @@ package art_of_joy.domain.service.exel
 
 import art_of_joy.domain.model.Errors.{DomainError, LoadImageError}
 import art_of_joy.domain.model.ExelProduct
-import art_of_joy.domain.model.`enum`.ExelField
+import art_of_joy._
 import zio.*
 import zio.http.*
 

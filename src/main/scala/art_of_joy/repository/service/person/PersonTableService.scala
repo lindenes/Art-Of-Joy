@@ -3,7 +3,7 @@ package art_of_joy.repository.service.person
 import art_of_joy.ctx
 import art_of_joy.domain.model.Errors.{DataBaseError, DomainError}
 import art_of_joy.domain.model.Person
-import art_of_joy.domain.model.`enum`.Role
+import art_of_joy._
 import art_of_joy.repository.model.PersonRow
 import art_of_joy.repository.personSchema
 import zio.*

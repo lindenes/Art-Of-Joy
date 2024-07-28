@@ -2,7 +2,7 @@ package art_of_joy.application.http
 
 import art_of_joy.Env
 import art_of_joy.application.model.Errors.*
-import art_of_joy.domain.model.`enum`.{AcceptCodeType, AuthType, RegistrationError}
+import art_of_joy._
 import zio.{Scope, ZIO}
 import sttp.tapir.ztapir.*
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter

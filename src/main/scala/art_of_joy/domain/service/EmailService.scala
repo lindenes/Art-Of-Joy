@@ -1,9 +1,9 @@
-package art_of_joy.domain.service.email
+package art_of_joy.domain.service
 
 import zio.*
 import zio.config.*
 import Config.*
-import art_of_joy.ApplicationConfig.smtpConfig
+import art_of_joy.ApplicationConfig.{SmtpConfig, smtpConfig}
 import art_of_joy.domain.model.Errors.{DomainError, EmailServiceError}
 import zio.config.magnolia.deriveConfig
 
@@ -13,10 +13,10 @@ import java.util.Properties
 import javax.mail
 
 object EmailService {
-  def sendMessage(title: String, body: String, emailReceiver: String): ZIO[Any, DomainError, Unit] =
+  def sendMessage(title: String, body: String, emailReceiver: String): ZIO[SmtpConfig, DomainError, Unit] =
     (
       for {
-        config <- smtpConfig
+        config <- ZIO.service[SmtpConfig]
         props <- ZIO.from {
           val props = new Properties()
           props.put("mail.smtp.auth", config.auth);
