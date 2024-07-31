@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS product (
 	brand_id int NULL,
     created_at timestamp without time zone DEFAULT current_timestamp NOT NULL,
     article_wb varchar(40),
-    barcode varchar(40),
+    barcode varchar(40) NOT NULL,
     material varchar(50),
     fragility boolean,
     product_country varchar(50),
