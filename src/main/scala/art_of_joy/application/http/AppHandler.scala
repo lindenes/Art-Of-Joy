@@ -18,7 +18,7 @@ import zio.*
 import java.util.{Base64, Date, UUID}
 import javax.sql.DataSource
 
-object Handler {
+object AppHandler {
 
   def checkForTokenAuth(token:Option[String], authType:Int) =
     AuthType.fromOrdinal(authType) match

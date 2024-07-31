@@ -8,6 +8,7 @@ lazy val mail = "1.6.2"
 lazy val exel = "5.2.5"
 lazy val tapir = "1.10.8"
 lazy val zLog  = "2.3.0"
+
 lazy val zioLib = Seq(
   "dev.zio" %% "zio"                 % zio,
   "dev.zio" %% "zio-streams"         % zio,
@@ -16,8 +17,7 @@ lazy val zioLib = Seq(
   "dev.zio" %% "zio-config-typesafe" % zioConfig,
   "dev.zio" %% "zio-http"            % "3.0.0-RC4",
   "dev.zio" %% "zio-json"            % "0.6.2",
-  "dev.zio" %% "zio-logging"         % zLog,
-  "dev.zio" %% "zio-logging-slf4j"   % zLog
+  "dev.zio" %% "zio-logging"         % zLog
 )
 
 lazy val tapirLib = Seq(
@@ -42,8 +42,8 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       "io.getquill"          %% "quill-jdbc-zio" % "4.8.1",
       "org.postgresql"       %  "postgresql"     % "42.7.1",
-      "org.slf4j"            % "slf4j-api"       % "2.0.9",
-      "ch.qos.logback"       % "logback-classic" % "1.5.2",
+      "org.slf4j"            % "slf4j-api"       % "2.0.12",
+      "ch.qos.logback"       % "logback-classic" % "1.5.6",
       "javax.mail"           % "javax.mail-api"  %  mail,
       "com.sun.mail"         % "javax.mail"      %  mail,
       "org.apache.poi"       % "poi"             %  exel,

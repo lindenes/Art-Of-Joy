@@ -29,19 +29,19 @@ object CategoryRoute {
       .in(token)
       .in(jsonBody[List[CategoryAdd]])
       .out(jsonBody[List[CategoryHttp]])
-      .zServerLogic((token, categoryAdd) => Handler.addCategory(token, categoryAdd))
+      .zServerLogic((token, categoryAdd) => AppHandler.addCategory(token, categoryAdd))
     
   val getCategoryEndpoint: ZServerEndpoint[Env & Scope & DataSource, Any] =
     baseEndpoint.get
       .in("category")
       .out(jsonBody[List[CategoryHttp]])
-      .zServerLogic(_ => Handler.getCategory)
+      .zServerLogic(_ => AppHandler.getCategory)
     
   val getBrandEndpoint: ZServerEndpoint[Env & Scope & DataSource, Any] =
     baseEndpoint.get
       .in("brand")
       .out(jsonBody[List[BrandHttp]])
-      .zServerLogic(_ => Handler.getBrand)
+      .zServerLogic(_ => AppHandler.getBrand)
     
   val endpointList = List(
     categoryAddEndpoint, getCategoryEndpoint, getBrandEndpoint

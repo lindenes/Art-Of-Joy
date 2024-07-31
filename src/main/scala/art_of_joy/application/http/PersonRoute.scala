@@ -40,14 +40,14 @@ object PersonRoute {
         oneOfVariant(statusCode(StatusCode.BadRequest).and(jsonBody[HttpError]))
       )
     )
-    .zServerLogic((token, startRow, endRow) => Handler.getUserList(token, startRow, endRow))
+    .zServerLogic((token, startRow, endRow) => AppHandler.getUserList(token, startRow, endRow))
 
   val registrationEndpoint: ZServerEndpoint[Env & Scope & DataSource, Any] = baseEndpoint.post
     .in("registration")
     .in(jsonBody[RegPerson])
     .out(header[String]("Token"))
     .out(header[String]("Access-Control-Expose-Headers"))
-    .zServerLogic(Handler.registration)
+    .zServerLogic(AppHandler.registration)
 
   val acceptCodeEndpoint: ZServerEndpoint[Env & Scope & DataSource, Any] = endpoint.post
     .in("acceptCode")
@@ -60,7 +60,7 @@ object PersonRoute {
       )
     )
     .out(jsonBody[PersonHttp])
-    .zServerLogic((acceptCode, token) => Handler.checkAcceptCode(acceptCode, token))
+    .zServerLogic((acceptCode, token) => AppHandler.checkAcceptCode(acceptCode, token))
 
   val authEndpoint: ZServerEndpoint[Env & Scope & DataSource, Any] = baseEndpoint.post
     .in("authorization")
@@ -70,20 +70,20 @@ object PersonRoute {
     .out(jsonBody[Option[PersonHttp]])
     .out(header[String]("Access-Control-Expose-Headers"))
     .out(header[String]("Token"))
-    .zServerSecurityLogic((token, authType) => Handler.checkForTokenAuth(token, authType))
-    .serverLogic((token, authType) => clientPerson => Handler.authorization(clientPerson, token, authType))
+    .zServerSecurityLogic((token, authType) => AppHandler.checkForTokenAuth(token, authType))
+    .serverLogic((token, authType) => clientPerson => AppHandler.authorization(clientPerson, token, authType))
 
   val personInfoEndpoint: ZServerEndpoint[Env & Scope & DataSource, Any] = baseEndpoint.post
     .in("personInfo")
     .in(jsonBody[UpdatePersonInfo])
     .in(token)
-    .zServerLogic((updatePersonInfo, token) => Handler.setPersonInfo(updatePersonInfo, token))
+    .zServerLogic((updatePersonInfo, token) => AppHandler.setPersonInfo(updatePersonInfo, token))
 
   val passwordEndpoint: ZServerEndpoint[Env & Scope & DataSource, Any] = baseEndpoint.post
     .in("password")
     .in(jsonBody[SetPassword])
     .in(token)
-    .zServerLogic((setPassword,token) => Handler.setPassword(setPassword,token))
+    .zServerLogic((setPassword,token) => AppHandler.setPassword(setPassword,token))
 
   val allEndpoints = List(
     personEndpoint, registrationEndpoint, authEndpoint, acceptCodeEndpoint, personInfoEndpoint, passwordEndpoint
