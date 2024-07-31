@@ -2,11 +2,10 @@ package art_of_joy.repository.service.category
 
 import art_of_joy.ctx
 import art_of_joy.domain.model.Errors.{DataBaseError, DomainError}
-import art_of_joy.model.category.BrandRow
 import io.getquill.*
 import zio.{ZIO, ZLayer}
 import art_of_joy.repository.*
-import art_of_joy.repository.model.{CategoryRow, SubCategoryRow}
+import art_of_joy.repository.model._
 
 import javax.sql.DataSource
 class CategoryTableService extends CategoryTable{

@@ -1,11 +1,11 @@
 package art_of_joy.repository.service.category
 
 import art_of_joy.domain.model.Errors.DomainError
-import art_of_joy.model.category.BrandRow
-import art_of_joy.repository.model.{CategoryRow, SubCategoryRow}
+import art_of_joy.repository.model._
 
 import javax.sql.DataSource
 import zio.*
+
 trait CategoryTable {
   def getCategories:ZIO[DataSource,DomainError, List[CategoryRow]]
   def getCategoryWithSub:ZIO[DataSource, DomainError,  List[(CategoryRow, Option[SubCategoryRow])]]

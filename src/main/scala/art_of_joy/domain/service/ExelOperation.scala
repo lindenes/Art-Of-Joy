@@ -1,8 +1,8 @@
 package art_of_joy.domain.service
 
 import art_of_joy.*
+import art_of_joy.application.model.Response.ExelProduct
 import art_of_joy.domain.model.Errors.{DomainError, LoadExelDataError}
-import art_of_joy.domain.model.ExelProduct
 import org.apache.poi.ss.usermodel.*
 import zio.*
 

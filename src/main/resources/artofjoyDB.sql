@@ -44,10 +44,10 @@ CREATE SEQUENCE IF NOT EXISTS product_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS product (
     id int default nextval('product_id_seq') NOT NULL,
-	article varchar(40) NULL,
-	name varchar(200) NULL,
+	article varchar(40) NOT NULL,
+	"name" varchar(200) NOT NULL,
 	"description" varchar(2500) NULL,
-	price decimal(10, 2) NULL,
+	price decimal(10, 2) NOT NULL,
 	subcategory_id int NULL,
 	brand_id int NULL,
     created_at timestamp without time zone DEFAULT current_timestamp NOT NULL,
@@ -105,11 +105,35 @@ CREATE TABLE IF NOT EXISTS product_group(
     CONSTRAINT product_group_pk PRIMARY KEY (id)
 );
 
-CREATE SEQUENCE IF NOT EXISTS product_order_id_seq  INCREMENT BY 1 START WITH 1;
+CREATE SEQUENCE IF NOT EXISTS product_order_id_seq INCREMENT BY 1 START WITH 1;
 
 CREATE TABLE IF NOT EXISTS product_order (
     id int default nextval('product_order_id_seq') NOT NULL,
 	order_id int4 NOT NULL,
 	product_id int4 NOT NULL,
 	CONSTRAINT product_order_pk PRIMARY KEY (id)
+);
+
+create sequence if not exists section_id_seq INCREMENT BY 1 START WITH 1;
+
+CREATE TABLE IF NOT EXISTS "section" (
+    id int default nextval('section_id_seq') not null,
+    "name" varchar(50) not null,
+    CONSTRAINT section_pk primary key (id)
+);
+
+create sequence if not exists post_id_seq INCREMENT BY 1 START WITH 1;
+
+CREATE TABLE IF NOT EXISTS post (
+    id int default nextval('post_id_seq') not null,
+    "name" varchar(60) not null,
+    content varchar(1000) not null
+);
+
+create sequence if not exists product_post_id_seq INCREMENT BY 1 START WITH 1;
+
+create table if not exists product_post (
+    id int default nextval('product_post_id_seq') not null,
+    post_id int not null,
+    product_id int not null
 );

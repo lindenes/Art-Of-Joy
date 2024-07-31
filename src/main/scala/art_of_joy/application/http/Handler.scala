@@ -1,16 +1,14 @@
 package art_of_joy.application.http
 
 import art_of_joy.Env
-import art_of_joy.application.model.CategoryApplication.{BrandHttp, CategoryAdd, CategoryHttp, SubCategoryHttp}
+import art_of_joy.application.model.Request.*
 import art_of_joy.application.model.Errors.*
-import art_of_joy.application.model.PersonApplication.*
-import art_of_joy.application.model.ProductClientFilter
+import art_of_joy.application.model.Response.*
 import art_of_joy.domain.model.Errors.*
 import art_of_joy.domain.model.StoragePerson
 import art_of_joy.*
-import art_of_joy.domain.service.{CategoryService, ExelOperation, PersonService}
+import art_of_joy.domain.service.{CategoryService, ExelOperation, PersonService, ProductService}
 import art_of_joy.domain.service.session.SessionStorage
-import art_of_joy.model.product.ExelBase64
 import art_of_joy.repository.service.category.CategoryTable
 import art_of_joy.repository.service.person.PersonTable
 import art_of_joy.repository.service.product.ProductTable
@@ -287,7 +285,13 @@ object Handler {
       }
 
   def getProduct(filter: ProductClientFilter) =
-    ProductTable.getProductList(filter)
+    ProductService.getProducts(filter)
+      .map(_.map(productRow =>
+        ProductHttp(productRow.id, productRow.article, productRow.name, productRow.description, productRow.price,
+          productRow.subcategoryId, productRow.brandId, productRow.createdAt, productRow.articleWb, productRow.barcode,
+          productRow.material, productRow.fragility, productRow.productCountry, productRow.color, productRow.height,
+          productRow.width, productRow.size, productRow.ruSize)
+      ))
       .mapError{
         case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
         case _ => HttpError(applicationMessage = "unknown error")

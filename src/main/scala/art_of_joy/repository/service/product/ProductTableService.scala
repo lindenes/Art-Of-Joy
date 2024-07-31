@@ -1,6 +1,6 @@
 package art_of_joy.repository.service.product
 
-import art_of_joy.application.model.ProductClientFilter
+import art_of_joy.application.model.Request.ProductClientFilter
 import art_of_joy.ctx
 import art_of_joy.domain.model.Errors.{DataBaseError, DomainError}
 import art_of_joy.repository.model.ProductRow
@@ -23,15 +23,15 @@ class ProductTableService extends ProductTable {
       alias(_.subcategoryId, "subcategory_id"),
       alias(_.ruSize, "ru_size"),
       alias(_.articleWb, "article_wb"),
-      alias(_.brandID, "brand_id"),
+      alias(_.brandId, "brand_id"),
       alias(_.productCountry, "product_country"),
       alias(_.createdAt, "created_at")
     )
-      .filterOpt(filters.name.map(_ + "%"))((product, name) => quote( product.name.getOrElse("") like name))
-      .filterOpt(filters.brandID.map(List(_)))((product, brand) => quote(brand.contains(product.brandID)))
+      .filterOpt(filters.name.map(_ + "%"))((product, name) => quote( product.name like name))
+      .filterOpt(filters.brandID.map(List(_)))((product, brand) => quote(brand.contains(product.brandId)))
       .filterOpt(filters.subCategoryID.map(List(_)))((product, subCategory) => quote(subCategory.contains(product.subcategoryId)))
-      .filterOpt(filters.maxPrice)((product, maxPrice) => quote(product.price.getOrElse(0.toDouble) <= maxPrice))
-      .filterOpt(filters.minPrice)((product, minPrice) => quote(product.price.getOrElse(0.toDouble) >= minPrice))
+      .filterOpt(filters.maxPrice)((product, maxPrice) => quote(product.price <= maxPrice))
+      .filterOpt(filters.minPrice)((product, minPrice) => quote(product.price >= minPrice))
   ).mapError(ex => DataBaseError(exception = ex))
 }
 object ProductTableService{

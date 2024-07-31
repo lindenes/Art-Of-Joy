@@ -1,6 +1,5 @@
 package art_of_joy.domain.service
 
-import art_of_joy.application.model.PersonApplication.PersonHttp
 import art_of_joy.ctx
 import art_of_joy.domain.model.Errors._
 import art_of_joy._

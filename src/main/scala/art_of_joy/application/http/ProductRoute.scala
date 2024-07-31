@@ -1,9 +1,8 @@
 package art_of_joy.application.http
 
-import art_of_joy.application.model.Errors._
-import art_of_joy.application.model.ProductClientFilter
-import art_of_joy.domain.model.ExelProduct
-import art_of_joy.model.product.ExelBase64
+import art_of_joy.application.model.Errors.*
+import art_of_joy.application.model.Request.*
+import art_of_joy.application.model.Response._
 import art_of_joy.repository.model.ProductRow
 import art_of_joy.repository.service.product.ProductTable
 import art_of_joy.timestampSchema
@@ -34,7 +33,7 @@ object ProductRoute {
     baseEndpoint.post
       .in("product")
       .in(jsonBody[ProductClientFilter])
-      .out(jsonBody[List[ProductRow]])
+      .out(jsonBody[List[ProductHttp]])
       .zServerLogic(filter => Handler.getProduct(filter))
     
   val routes = ZioHttpInterpreter().toHttp(exelRoute) ++ ZioHttpInterpreter().toHttp(productRoute)

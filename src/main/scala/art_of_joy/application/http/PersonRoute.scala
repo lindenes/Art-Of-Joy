@@ -10,7 +10,8 @@ import sttp.tapir.generic.auto.*
 import sttp.tapir.json.zio.*
 import art_of_joy.utils.*
 import zio.json.ast.{Json, JsonCursor}
-import art_of_joy.application.model.PersonApplication.*
+import art_of_joy.application.model.Request._
+import art_of_joy.application.model.Response._
 import sttp.model.StatusCode
 import sttp.tapir.EndpointOutput
 

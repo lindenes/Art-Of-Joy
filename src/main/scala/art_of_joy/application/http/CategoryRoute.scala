@@ -1,9 +1,9 @@
 package art_of_joy.application.http
 
-
 import art_of_joy.Env
-import art_of_joy.application.model.CategoryApplication.*
 import art_of_joy.application.model.Errors.*
+import art_of_joy.application.model.Request.*
+import art_of_joy.application.model.Response._
 import zio.*
 import sttp.tapir.ztapir.*
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter

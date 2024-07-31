@@ -1,6 +1,6 @@
 package art_of_joy.repository.service.product
 
-import art_of_joy.application.model.ProductClientFilter
+import art_of_joy.application.model.Request.ProductClientFilter
 import art_of_joy.domain.model.Errors.DomainError
 
 import javax.sql.DataSource

@@ -1,7 +1,7 @@
 package art_of_joy.domain.service
 
-import art_of_joy.application.model.CategoryApplication.CategoryAdd
-import art_of_joy.domain.model.CategoryDomain.*
+import art_of_joy.application.model.Request.*
+import art_of_joy.domain.model._
 import art_of_joy.domain.model.Errors.DomainError
 import art_of_joy.repository.model.{CategoryRow, SubCategoryRow}
 import art_of_joy.repository.service.category.CategoryTable
