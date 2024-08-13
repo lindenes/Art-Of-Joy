@@ -51,9 +51,9 @@ object ProductRoute {
 
   val routes = ZioHttpInterpreter().toHttp(exelEndpoint) ++ ZioHttpInterpreter().toHttp(
     List(
-      productGetEndpoint, productPhotoAddEndpoint
+      productGetEndpoint, productPhotoAddEndpoint, productAddEndpoint
     )
   )
 
-  val endPointList = List(exelEndpoint, productGetEndpoint).map(_.endpoint)
+  val endPointList = List(exelEndpoint, productGetEndpoint, productPhotoAddEndpoint, productAddEndpoint).map(_.endpoint)
 }
