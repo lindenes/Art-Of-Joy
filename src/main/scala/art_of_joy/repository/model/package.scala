@@ -11,8 +11,8 @@ package object model {
                         name: String,
                         description: Option[String],
                         price: Double,
-                        subcategoryId: Option[Int],
-                        brandId: Option[Int],
+                        subcategoryId: Long,
+                        brandId: Long,
                         createdAt: Timestamp,
                         articleWb: Option[String],
                         barcode: String,
@@ -41,5 +41,7 @@ package object model {
   
   case class CategoryRow(id:Long, name:String)
 
-  case class BrandRow(id:Int, name:String)
+  case class BrandRow(id:Long, name:String)
+  
+  case class ProductImageRow(id:Long, binaryData:Array[Byte], productId:Long)
 }

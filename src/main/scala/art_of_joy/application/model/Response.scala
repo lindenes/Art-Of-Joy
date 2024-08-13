@@ -31,8 +31,8 @@ object Response {
                          name: String,
                          description: Option[String],
                          price: Double,
-                         subcategoryId: Option[Int],
-                         brandId: Option[Int],
+                         subcategoryId: Long,
+                         brandId: Long,
                          createdAt: Timestamp,
                          articleWb: Option[String],
                          barcode: String,
@@ -78,6 +78,7 @@ object Response {
                           name: Option[String],
                           description: Option[String],
                           subcategoryName: Option[String],
+                          categoryName:Option[String],
                           brandName: Option[String],
                           article_wb: Option[String],
                           barcode: Option[String],
@@ -88,10 +89,8 @@ object Response {
                           height: Option[String],
                           width: Option[String],
                           size: Option[String],
-                          ru_size: Option[String],
-                          mediaFile: Array[String]
+                          ru_size: Option[String]
                         )
-
   object ExelProduct {
     implicit val decoder: JsonDecoder[ExelProduct] = DeriveJsonDecoder.gen[ExelProduct]
     implicit val encoder: JsonEncoder[ExelProduct] = DeriveJsonEncoder.gen[ExelProduct]

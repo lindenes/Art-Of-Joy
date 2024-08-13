@@ -10,8 +10,6 @@ import art_of_joy.*
 import art_of_joy.domain.service.{CategoryService, ExelOperation, PersonService, ProductService}
 import art_of_joy.domain.service.session.SessionStorage
 import art_of_joy.repository.service.category.CategoryTable
-import art_of_joy.repository.service.person.PersonTable
-import art_of_joy.repository.service.product.ProductTable
 import art_of_joy.utils.*
 import zio.*
 
@@ -276,6 +274,15 @@ object AppHandler {
         case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
         case _ => HttpError(applicationMessage = "unknown error")
       }
+  
+  def addBrand(name:String) =
+    CategoryTable.addBrand(name)
+      .map(b => BrandHttp(b.id, b.name))
+      .mapError {
+        case error: StorageError => HttpError(error.message, error.exception.getMessage)
+        case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+        case _ => HttpError(applicationMessage = "unknown error")
+      }
 
   def parseExel(exel:ExelBase64) =
     ExelOperation.getProductFromExel(Base64.getDecoder.decode(exel.exelData))
@@ -296,4 +303,30 @@ object AppHandler {
         case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
         case _ => HttpError(applicationMessage = "unknown error")
       }
+  
+  def addProduct(product:ProductAdd) =
+    (
+      for{
+        addedRows <- ProductService.addProduct(product)
+        - <- ZIO.when(addedRows == 0)(ZIO.fail(HttpAddPhotoError(applicationMessage = "added rows = 0")))
+      }yield ()
+    ).mapError{
+      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+      case error: ApplicationError => error
+      case _ => HttpError(applicationMessage = "unknown error")
+    }
+    
+  
+  def addProductPhoto(productId:Long, binaryData:Array[Byte]) =
+    (
+      for{
+        addedRows <- ProductService.addPhoto(productId,binaryData)
+        - <- ZIO.when(addedRows == 0)(ZIO.fail(HttpAddPhotoError(applicationMessage = "added rows = 0")))
+      }yield ()
+    ).mapError{
+      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+      case error:ApplicationError => error
+      case _ => HttpError(applicationMessage = "unknown error")
+    }
+      
 }

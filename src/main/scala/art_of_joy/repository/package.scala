@@ -23,4 +23,8 @@ package object repository {
     _.passwordHash -> "password_hash",
     _.createdAt -> "created_at")
   )
+  val productImageSchema = quote(querySchema[ProductImageRow]("product_image",
+    _.productId -> "product_id",
+    _.binaryData -> "binary_data"
+  ))
 }

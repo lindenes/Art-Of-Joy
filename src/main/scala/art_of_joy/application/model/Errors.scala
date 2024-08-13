@@ -58,4 +58,14 @@ object Errors {
     implicit val encoder: JsonEncoder[HttpExelLoadError] = DeriveJsonEncoder.gen[HttpExelLoadError]
   }
   
+  case class HttpAddPhotoError(
+                            message: String = "Фото не добавлено, неизвестная ошибка",
+                            applicationMessage: String
+                          ) extends ApplicationError
+
+  object AddPhotoError {
+    implicit val decoder: JsonDecoder[HttpAddPhotoError] = DeriveJsonDecoder.gen[HttpAddPhotoError]
+    implicit val encoder: JsonEncoder[HttpAddPhotoError] = DeriveJsonEncoder.gen[HttpAddPhotoError]
+  }
+  
 }

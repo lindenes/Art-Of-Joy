@@ -12,6 +12,7 @@ trait CategoryTable {
   def addCategory(name:String):ZIO[DataSource,DomainError, CategoryRow]
   def addSubCategory(name:String, categoryId:Long):ZIO[DataSource,DomainError,SubCategoryRow]
   def getBrands:ZIO[DataSource,DomainError, List[BrandRow]]
+  def addBrand(name:String):ZIO[DataSource,DomainError,BrandRow]
 }
 object CategoryTable{
   def getAllCategories = 
@@ -28,4 +29,7 @@ object CategoryTable{
     
   def getBrands =
     ZIO.serviceWithZIO[CategoryTable](_.getBrands)
+  
+  def addBrand(name:String) =
+    ZIO.serviceWithZIO[CategoryTable](_.addBrand(name))
 }

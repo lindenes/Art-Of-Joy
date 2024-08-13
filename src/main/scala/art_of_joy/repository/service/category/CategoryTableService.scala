@@ -32,6 +32,11 @@ class CategoryTableService extends CategoryTable{
   override def getBrands: ZIO[DataSource, DomainError, List[BrandRow]] =
     ctx.run(brandSchema)
       .mapError(ex => DataBaseError(exception = ex))
+
+  override def addBrand(name: String): ZIO[DataSource, DomainError, BrandRow] =
+    ctx.run(
+      brandSchema.insert(_.name -> lift(name)).returning(b => b)
+    ).mapError(ex => DataBaseError(exception = ex))
 }
 object CategoryTableService{
   val live = ZLayer.succeed(CategoryTableService())

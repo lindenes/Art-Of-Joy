@@ -21,21 +21,39 @@ object ProductRoute {
       )
     )
   
-  val exelRoute =
+  val exelEndpoint =
     baseEndpoint.post
       .in("exel")
       .in(jsonBody[ExelBase64])
       .out(jsonBody[List[ExelProduct]])
       .zServerLogic(exel => AppHandler.parseExel(exel))
     
-  val productRoute =
+  val productGetEndpoint =
     baseEndpoint.post
-      .in("product")
+      .in("getProduct")
       .in(jsonBody[ProductClientFilter])
       .out(jsonBody[List[ProductHttp]])
       .zServerLogic(filter => AppHandler.getProduct(filter))
-    
-  val routes = ZioHttpInterpreter().toHttp(exelRoute) ++ ZioHttpInterpreter().toHttp(productRoute)
-  
-  val endPointList = List(exelRoute, productRoute).map(_.endpoint)
+
+  val productAddEndpoint =
+    baseEndpoint.post
+      .in("addProduct")
+      .in(jsonBody[ProductAdd])
+      .out(statusCode(StatusCode.Ok))
+      .zServerLogic(p => AppHandler.addProduct(p))
+
+  val productPhotoAddEndpoint =
+    baseEndpoint.post
+      .in("addPhoto")
+      .in(jsonBody[ProductPhotoAdd])
+      .out(statusCode(StatusCode.Ok))
+      .zServerLogic(data => AppHandler.addProductPhoto(data.id, data.binaryData))
+
+  val routes = ZioHttpInterpreter().toHttp(exelEndpoint) ++ ZioHttpInterpreter().toHttp(
+    List(
+      productGetEndpoint, productPhotoAddEndpoint
+    )
+  )
+
+  val endPointList = List(exelEndpoint, productGetEndpoint).map(_.endpoint)
 }

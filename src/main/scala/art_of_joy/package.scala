@@ -29,6 +29,7 @@ package object art_of_joy {
     case article extends ExelField("Артикул продавца")
     case articleWB extends ExelField("Артикул WB")
     case subcategory extends ExelField("Предмет")
+    case category extends ExelField("Категория")
     case brand extends ExelField("Бренд")
     case name extends ExelField("Наименование")
     case description extends ExelField("Описание")

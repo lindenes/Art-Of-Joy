@@ -42,9 +42,16 @@ object CategoryRoute {
       .in("brand")
       .out(jsonBody[List[BrandHttp]])
       .zServerLogic(_ => AppHandler.getBrand)
+
+  val brandAddEndpoint: ZServerEndpoint[Env & Scope & DataSource, Any] =
+    baseEndpoint.post
+      .in("brand")
+      .in(jsonBody[BrandAdd])
+      .out(jsonBody[BrandHttp])
+      .zServerLogic(brand => AppHandler.addBrand(brand.name))
     
   val endpointList = List(
-    categoryAddEndpoint, getCategoryEndpoint, getBrandEndpoint
+    categoryAddEndpoint, getCategoryEndpoint, getBrandEndpoint,brandAddEndpoint
   )
   val routes = ZioHttpInterpreter().toHttp(endpointList)
   val endPointList = endpointList.map(_.endpoint)

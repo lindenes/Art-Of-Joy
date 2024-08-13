@@ -59,4 +59,44 @@ object Request {
     implicit val decoder: JsonDecoder[ExelBase64] = DeriveJsonDecoder.gen[ExelBase64]
     implicit val encoder: JsonEncoder[ExelBase64] = DeriveJsonEncoder.gen[ExelBase64]
   }
+  
+  case class BrandAdd(name:String)
+  object BrandAdd {
+    implicit val decoder: JsonDecoder[BrandAdd] = DeriveJsonDecoder.gen[BrandAdd]
+    implicit val encoder: JsonEncoder[BrandAdd] = DeriveJsonEncoder.gen[BrandAdd]
+  }
+  
+  case class ProductAdd(
+                             article: String,
+                             name: String,
+                             description: Option[String],
+                             subcategoryId: Long,
+                             categoryId: Long,
+                             brandId: Long,
+                             articleWb: Option[String],
+                             barcode: String,
+                             material: Option[String],
+                             fragility: Option[Boolean],
+                             productCountry: Option[String],
+                             color: Option[String],
+                             height: Option[String],
+                             width: Option[String],
+                             size: Option[String],
+                             ruSize: Option[String]
+                           )
+
+  object ProductAdd {
+    implicit val decoder: JsonDecoder[ProductAdd] = DeriveJsonDecoder.gen[ProductAdd]
+    implicit val encoder: JsonEncoder[ProductAdd] = DeriveJsonEncoder.gen[ProductAdd]
+  }
+  
+  case class ProductPhotoAdd(
+                            id:Long,
+                            binaryData:Array[Byte]
+                            )
+
+  object ProductPhotoAdd {
+    implicit val decoder: JsonDecoder[ProductPhotoAdd] = DeriveJsonDecoder.gen[ProductPhotoAdd]
+    implicit val encoder: JsonEncoder[ProductPhotoAdd] = DeriveJsonEncoder.gen[ProductPhotoAdd]
+  }
 }
