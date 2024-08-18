@@ -83,7 +83,7 @@ object Response {
                           article_wb: Option[String],
                           barcode: Option[String],
                           material: Option[String],
-                          fragility: Option[Boolean],
+                          fragility: Option[String],
                           product_country: Option[String],
                           color: Option[String],
                           height: Option[String],

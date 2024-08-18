@@ -9,6 +9,14 @@ import zio.*
 import java.io.ByteArrayInputStream
 
 object ExelOperation {
+
+  private def magicFunction(v:Cell, row:Int) =
+    
+    if(row == 0)
+      v.getStringCellValue
+    else
+      v.getNumericCellValue.toInt.toString
+
   def getProductFromExel(data: Array[Byte]): ZIO[Scope, DomainError, List[ExelProduct]] = {
     val inputStream = new ByteArrayInputStream(data)
     val sheet = WorkbookFactory.create(inputStream).getSheetAt(0)
@@ -23,7 +31,7 @@ object ExelOperation {
         }
     ZIO.from(
       (
-        for i <- 1 until sheet.getPhysicalNumberOfRows
+        for i <- 0 until sheet.getPhysicalNumberOfRows
           yield {
             val row = sheet.getRow(i)
             ExelProduct(
@@ -33,10 +41,10 @@ object ExelOperation {
               fieldPositions.find(_._1 == ExelField.subcategory).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue)),
               fieldPositions.find(_._1 == ExelField.category).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue)),
               fieldPositions.find(_._1 == ExelField.brand).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue)),
-              fieldPositions.find(_._1 == ExelField.articleWB).fold(None)((_, index) => Option(row.getCell(index)).map(_.getNumericCellValue.toInt.toString)),
+              fieldPositions.find(_._1 == ExelField.articleWB).fold(None)((_, index) => Option(row.getCell(index)).map(magicFunction(_,i))),
               fieldPositions.find(_._1 == ExelField.barcode).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue)),
               fieldPositions.find(_._1 == ExelField.material).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue)),
-              fieldPositions.find(_._1 == ExelField.fragility).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue == "хрупкое")),
+              fieldPositions.find(_._1 == ExelField.fragility).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue)),
               fieldPositions.find(_._1 == ExelField.productCountry).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue)),
               fieldPositions.find(_._1 == ExelField.color).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue)),
               fieldPositions.find(_._1 == ExelField.height).fold(None)((_, index) => Option(row.getCell(index)).map(_.getStringCellValue)),
