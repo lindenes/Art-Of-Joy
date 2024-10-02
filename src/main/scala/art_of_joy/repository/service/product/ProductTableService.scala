@@ -4,7 +4,7 @@ import art_of_joy.application.model.Request
 import art_of_joy.application.model.Request.{ProductAdd, ProductClientFilter}
 import art_of_joy.ctx
 import art_of_joy.domain.model.Errors.{DataBaseError, DomainError}
-import art_of_joy.repository.model.ProductRow
+import art_of_joy.repository.model.{ProductRow, CartRow}
 import art_of_joy.repository.*
 import art_of_joy.repository.service.product
 import zio.*
@@ -68,6 +68,21 @@ class ProductTableService extends ProductTable {
   override def addPhoto(productId: Long, binaryData: Array[Byte]): ZIO[DataSource, DomainError, Long] =
     ctx.run(
       productImageSchema.insert(_.productId -> lift(productId), _.binaryData -> lift(binaryData))
+    ).mapError(ex => DataBaseError(exception = ex))
+
+  override def addToCart(productId:Long, personId:Long):ZIO[DataSource, DomainError, Long] =
+    ctx.run(
+      cartSchema.insert(_.productId -> lift(productId), _.personId -> lift(personId))
+    ).mapError(ex => DataBaseError(exception = ex))
+
+  override def getPersonCart(personId: Long): ZIO[DataSource, DomainError, List[CartRow]] =
+    ctx.run(
+      cartSchema.filter(_.personId == lift(personId))
+    ).mapError(ex => DataBaseError(exception = ex))
+
+  override def deleteProductFromCart(personId:Long, productId:Long) =
+    ctx.run(
+      cartSchema.filter(p => p.personId == lift(personId) && p.productId == lift(productId)).delete
     ).mapError(ex => DataBaseError(exception = ex))
 }
 object ProductTableService{

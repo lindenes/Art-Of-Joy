@@ -137,3 +137,11 @@ create table if not exists product_post (
     post_id int not null,
     product_id int not null
 );
+
+CREATE TABLE if not exists cart(
+    id int default nextval('card_id_seq') not null,
+    product_id int not null,
+    person_id int not null
+);
+
+create sequence if not exists cart_id_seq increment by 1 start with 1;

@@ -27,4 +27,5 @@ package object repository {
     _.productId -> "product_id",
     _.binaryData -> "binary_data"
   ))
+  val cartSchema:Quoted[EntityQuery[CartRow]] = quote(querySchema[CartRow]("cargo", _.productId -> "product_id", _.personId -> "person_id"))
 }
