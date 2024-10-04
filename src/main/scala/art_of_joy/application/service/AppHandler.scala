@@ -1,14 +1,13 @@
-package art_of_joy.application.http
+package art_of_joy.application.service
 
-import art_of_joy.Env
-import art_of_joy.application.model.Request.*
+import art_of_joy.*
 import art_of_joy.application.model.Errors.*
+import art_of_joy.application.model.Request.*
 import art_of_joy.application.model.Response.*
 import art_of_joy.domain.model.Errors.*
 import art_of_joy.domain.model.StoragePerson
-import art_of_joy.*
-import art_of_joy.domain.service.{CategoryService, ExelOperation, PersonService, ProductService}
 import art_of_joy.domain.service.session.SessionStorage
+import art_of_joy.domain.service.{CategoryService, ExelOperation, PersonService, ProductService}
 import art_of_joy.repository.service.category.CategoryTable
 import art_of_joy.utils.*
 import zio.*
@@ -250,7 +249,7 @@ object AppHandler {
       case _ => HttpError(applicationMessage = "unknown error")
     }
 
-  def getCategory =
+  def getCategory = (_:Unit) =>
     CategoryService.getCategories
       .map(categoryList =>
         categoryList.map(category =>
@@ -266,7 +265,7 @@ object AppHandler {
         case _ => HttpError(applicationMessage = "unknown error")
       }
 
-  def getBrand =
+  def getBrand = (_:Unit) =>
     CategoryTable.getBrands
       .map(_.map(b => BrandHttp(b.id, b.name)))
       .mapError{
@@ -275,8 +274,8 @@ object AppHandler {
         case _ => HttpError(applicationMessage = "unknown error")
       }
   
-  def addBrand(name:String) =
-    CategoryTable.addBrand(name)
+  def addBrand(inData:BrandAdd) =
+    CategoryTable.addBrand(inData.name)
       .map(b => BrandHttp(b.id, b.name))
       .mapError {
         case error: StorageError => HttpError(error.message, error.exception.getMessage)
@@ -317,10 +316,10 @@ object AppHandler {
     }
     
   
-  def addProductPhoto(productId:Long, binaryData:Array[Byte]) =
+  def addProductPhoto(productPhoto:ProductPhotoAdd) =
     (
       for{
-        addedRows <- ProductService.addPhoto(productId,binaryData)
+        addedRows <- ProductService.addPhoto(productPhoto.id,productPhoto.binaryData.toArray)
         - <- ZIO.when(addedRows == 0)(ZIO.fail(HttpAddPhotoError(applicationMessage = "added rows = 0")))
       }yield ()
     ).mapError{

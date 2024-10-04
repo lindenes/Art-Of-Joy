@@ -1,8 +1,8 @@
 package art_of_joy
 
-import sttp.tapir._
 import zio.ZIO
 import zio.http.Request
+import zio.http.codec.HeaderCodec
 
 import java.security.MessageDigest
 import java.util.Random
@@ -31,5 +31,6 @@ package object utils {
       for (_ <- 1 to 6)
         yield chars(random.nextInt(chars.length))
     ).mkString
-  val token = header[String]("Token")
+    
+  val token = HeaderCodec.name[String]("token")
 }

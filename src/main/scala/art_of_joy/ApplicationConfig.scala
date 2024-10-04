@@ -20,21 +20,10 @@ object ApplicationConfig {
         .nested("api")
         .load(deriveConfig[Api])
         .map(config =>
-          Server.Config(
-            sslConfig = None,
-            address = new InetSocketAddress(config.host, config.port),
-            acceptContinue = false,
-            keepAlive = true,
-            requestDecompression = Decompression.No,
-            responseCompression = None,
-            requestStreaming = RequestStreaming.Disabled(1024 * 100),
-            maxHeaderSize = 8192,
-            logWarningOnFatalError = true,
-            gracefulShutdownTimeout = config.timeoutSec.second,
-            webSocketConfig = WebSocketConfig.default,
-            idleTimeout = None,
-            maxInitialLineLength = config.maxInitialLineLength
-          )
+          Server.Config.default
+            .binding(config.host, config.port)
+            .idleTimeout(config.timeoutSec.second)
+            .maxInitialLineLength(config.maxInitialLineLength)
         )
     )
     

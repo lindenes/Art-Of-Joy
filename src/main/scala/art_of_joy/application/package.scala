@@ -1,14 +1,14 @@
-package art_of_joy.application
+package art_of_joy
 
-import sttp.apispec.openapi.Info
-import sttp.tapir.server.ziohttp.ZioHttpInterpreter
-import sttp.tapir.swagger.bundle.SwaggerInterpreter
-import zio.Task
 import zio.http.*
-import zio.http.Middleware.{CorsConfig, cors}
-import zio.http.Header.{AccessControlAllowHeaders, AccessControlAllowMethods, AccessControlAllowOrigin, AccessControlExposeHeaders, Origin}
-import zio.http.endpoint.openapi.SwaggerUI
-package object http {
+import zio.http.codec.PathCodec.*
+import art_of_joy.application.http.*
+import art_of_joy.application.service.RouteImpl
+import zio.http.Header.{AccessControlAllowOrigin, Origin}
+import zio.http.Middleware.CorsConfig
+import zio.http.endpoint.openapi._
+
+package object application {
 
   val config: CorsConfig =
     CorsConfig(
@@ -17,13 +17,21 @@ package object http {
         case origin@_ => Some(AccessControlAllowOrigin.Specific(origin))
 
       },
-     // allowedMethods = AccessControlAllowMethods(Method.PUT, Method.POST, Method.GET, Method.DELETE),
+      // allowedMethods = AccessControlAllowMethods(Method.PUT, Method.POST, Method.GET, Method.DELETE),
     )
 
-  def getSwaggerDocRoutes = SwaggerInterpreter().fromEndpoints[Task](
-    ProductRoute.endPointList ++ PersonRoute.endPointList ++ CategoryRoute.endPointList,
-    Info("Документация по api", "0.0.1")
+  val swaggerRoutes = SwaggerUI.routes(
+    "docs",
+    OpenAPIGen.fromEndpoints(
+      title = "Kaban_Zdorova",
+      version = "1.0",
+      CategoryEndpoint.endpointList ::: PersonEndpoint.endpointList ::: PersonEndpoint.endpointList
+    )
   )
-  def getRoutes = (CategoryRoute.routes ++ PersonRoute.routes ++ ProductRoute.routes)
-    @@ cors(config) @@ Middleware.requestLogging() ++ ZioHttpInterpreter().toHttp(getSwaggerDocRoutes)
+
+  def getRoutes = 
+    Routes.fromIterable(
+      RouteImpl.categoryImpl ::: RouteImpl.productImpl
+    ) ++ swaggerRoutes
+
 }

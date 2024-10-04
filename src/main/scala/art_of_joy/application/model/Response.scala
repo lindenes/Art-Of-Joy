@@ -1,29 +1,31 @@
 package art_of_joy.application.model
 
-import zio.json.*
-
+import zio.schema.{Schema,DeriveSchema}
 import java.sql.Timestamp
 
 object Response {
+
+  implicit val timestampSchema:Schema[Timestamp] = Schema[Long].transform(
+    millis => new Timestamp(millis),
+    ts => ts.getTime
+  )
+
   case class SubCategoryHttp(id: Long, name: String, categoryId: Long)
 
   object SubCategoryHttp {
-    implicit val decoder: JsonDecoder[SubCategoryHttp] = DeriveJsonDecoder.gen[SubCategoryHttp]
-    implicit val encoder: JsonEncoder[SubCategoryHttp] = DeriveJsonEncoder.gen[SubCategoryHttp]
+    implicit val schema: Schema[SubCategoryHttp] = DeriveSchema.gen
   }
 
   case class CategoryHttp(id: Long, name: String, subCategories: List[SubCategoryHttp])
 
   object CategoryHttp {
-    implicit val decoder: JsonDecoder[CategoryHttp] = DeriveJsonDecoder.gen[CategoryHttp]
-    implicit val encoder: JsonEncoder[CategoryHttp] = DeriveJsonEncoder.gen[CategoryHttp]
+    implicit val schema: Schema[CategoryHttp] = DeriveSchema.gen
   }
 
   case class BrandHttp(id: Long, name: String)
 
   object BrandHttp {
-    implicit val decoder: JsonDecoder[BrandHttp] = DeriveJsonDecoder.gen[BrandHttp]
-    implicit val encoder: JsonEncoder[BrandHttp] = DeriveJsonEncoder.gen[BrandHttp]
+    implicit val schema: Schema[BrandHttp] = DeriveSchema.gen
   }
 
   case class ProductHttp(id: Int,
@@ -47,12 +49,7 @@ object Response {
                         )
 
   object ProductHttp {
-    implicit val timestampCodec: JsonCodec[Timestamp] = JsonCodec.apply[Timestamp](
-      JsonEncoder.string.contramap(_.toString),
-      JsonDecoder.string.map(Timestamp.valueOf),
-    )
-    implicit val decoder: JsonDecoder[ProductHttp] = DeriveJsonDecoder.gen[ProductHttp]
-    implicit val encoder: JsonEncoder[ProductHttp] = DeriveJsonEncoder.gen[ProductHttp]
+    implicit val schema: Schema[ProductHttp] = DeriveSchema.gen
   }
 
   case class PersonHttp(
@@ -69,8 +66,7 @@ object Response {
                        )
 
   object PersonHttp {
-    implicit val decoder: JsonDecoder[PersonHttp] = DeriveJsonDecoder.gen[PersonHttp]
-    implicit val encoder: JsonEncoder[PersonHttp] = DeriveJsonEncoder.gen[PersonHttp]
+    implicit val schema: Schema[PersonHttp] = DeriveSchema.gen
   }
 
   case class ExelProduct(
@@ -92,8 +88,7 @@ object Response {
                           ru_size: Option[String]
                         )
   object ExelProduct {
-    implicit val decoder: JsonDecoder[ExelProduct] = DeriveJsonDecoder.gen[ExelProduct]
-    implicit val encoder: JsonEncoder[ExelProduct] = DeriveJsonEncoder.gen[ExelProduct]
+    implicit val schema: Schema[ExelProduct] = DeriveSchema.gen
   }
   
 }

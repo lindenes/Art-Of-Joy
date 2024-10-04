@@ -5,7 +5,7 @@ import io.getquill.jdbczio.Quill.DataSource
 import zio.*
 import zio.http.*
 import zio.http.netty.NettyConfig
-import art_of_joy.application.http.getRoutes
+import art_of_joy.application.getRoutes
 import art_of_joy.repository.service.category.CategoryTableService
 import art_of_joy.domain.*
 import art_of_joy.domain.service.session.{SessionStorage, SessionStorageService}

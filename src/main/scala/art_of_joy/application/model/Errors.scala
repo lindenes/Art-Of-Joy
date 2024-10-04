@@ -1,22 +1,24 @@
 package art_of_joy.application.model
 
-import zio.json._
+import zio.json.*
+import zio.schema.{Schema, DeriveSchema}
 object Errors {
   
-  sealed trait ApplicationError{
+  abstract class ApplicationError{
     val message:String
   }
   
-  case class HttpValidationFields(fieldName: String, message: String) extends ApplicationError
+  case class HttpValidationFields(
+                                   fieldName: String, 
+                                   message: String
+                                 ) extends ApplicationError
   object HttpValidationFields {
-    implicit val decoder: JsonDecoder[HttpValidationFields] = DeriveJsonDecoder.gen[HttpValidationFields]
-    implicit val encoder: JsonEncoder[HttpValidationFields] = DeriveJsonEncoder.gen[HttpValidationFields]
+    implicit val schema: Schema[HttpValidationFields] = DeriveSchema.gen
   }
   
   case class HttpValidationError(errorList:List[HttpValidationFields], message: String = "Валидационная ошибка") extends ApplicationError
   object HttpValidationError {
-    implicit val decoder: JsonDecoder[HttpValidationError] = DeriveJsonDecoder.gen[HttpValidationError]
-    implicit val encoder: JsonEncoder[HttpValidationError] = DeriveJsonEncoder.gen[HttpValidationError]
+    implicit val schema: Schema[HttpValidationError] = DeriveSchema.gen
   }
   
   case class HttpDatabaseError(
@@ -25,8 +27,7 @@ object Errors {
                               ) extends ApplicationError
 
   object HttpDatabaseError {
-    implicit val decoder: JsonDecoder[HttpDatabaseError] = DeriveJsonDecoder.gen[HttpDatabaseError]
-    implicit val encoder: JsonEncoder[HttpDatabaseError] = DeriveJsonEncoder.gen[HttpDatabaseError]
+    implicit val schema: Schema[HttpDatabaseError] = DeriveSchema.gen
   }
   
   case class HttpError(
@@ -35,8 +36,7 @@ object Errors {
                       ) extends ApplicationError
 
   object HttpError {
-    implicit val decoder: JsonDecoder[HttpError] = DeriveJsonDecoder.gen[HttpError]
-    implicit val encoder: JsonEncoder[HttpError] = DeriveJsonEncoder.gen[HttpError]
+    implicit val schema: Schema[HttpError] = DeriveSchema.gen
   }
 
   case class HttpNotFoundUser(
@@ -44,8 +44,7 @@ object Errors {
                         applicationMessage: String
                       ) extends ApplicationError
   object HttpNotFoundUser {
-    implicit val decoder: JsonDecoder[HttpNotFoundUser] = DeriveJsonDecoder.gen[HttpNotFoundUser]
-    implicit val encoder: JsonEncoder[HttpNotFoundUser] = DeriveJsonEncoder.gen[HttpNotFoundUser]
+    implicit val schema: Schema[HttpNotFoundUser] = DeriveSchema.gen
   }
 
   case class HttpExelLoadError(
