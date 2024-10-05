@@ -58,7 +58,7 @@ object ProductEndpoint {
         HttpCodec.error[HttpDatabaseError](Status.BadGateway),
         HttpCodec.error[HttpError](Status.BadRequest)
       )
-  
+
   val addCartEndpoint =
     Endpoint(RoutePattern.POST / "cart")
       .header(token)
@@ -78,8 +78,9 @@ object ProductEndpoint {
         HttpCodec.error[HttpDatabaseError](Status.BadGateway),
         HttpCodec.error[HttpError](Status.BadRequest)
       )
-  
+
   val endpointList = List(
-    exelEndpoint, productGetEndpoint, productAddEndpoint, productPhotoAddEndpoint, getCartEndpoint
+    exelEndpoint, productGetEndpoint, productAddEndpoint, productPhotoAddEndpoint, getCartEndpoint,
+    addCartEndpoint, deleteCartEndpoint
   )
 }
