@@ -21,4 +21,12 @@ package object model {
                    )
 
   case class StoragePerson(person: Person, lastVisitTime: Long, acceptCode: String = "")
+  
+  case class CartProduct(
+                          id:Long,
+                          productName:String,
+                          productId:Long,
+                          count:Int,
+                          price:Double
+                        )
 }

@@ -44,5 +44,5 @@ object EmailService {
           Transport.send(message)
         )
       } yield {}
-    ).mapError(ex => EmailServiceError(exception = ex))
+    ).mapError(ex => EmailServiceError(ex.getMessage))
 }

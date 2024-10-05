@@ -85,4 +85,14 @@ object Request {
   object ProductPhotoAdd {
     implicit val schema: Schema[ProductPhotoAdd] = DeriveSchema.gen
   }
+  
+  case class AddToCart(productId:Long)
+  object AddToCart {
+    implicit val schema: Schema[AddToCart] = DeriveSchema.gen
+  }
+
+  case class DeleteFromCart(id: Long)
+  object DeleteFromCart {
+    implicit val schema: Schema[DeleteFromCart] = DeriveSchema.gen
+  }
 }

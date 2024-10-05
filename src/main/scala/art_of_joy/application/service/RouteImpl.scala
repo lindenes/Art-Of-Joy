@@ -15,7 +15,10 @@ object RouteImpl {
     ProductEndpoint.exelEndpoint            implement AppHandler.parseExel,
     ProductEndpoint.productGetEndpoint      implement AppHandler.getProduct,
     ProductEndpoint.productAddEndpoint      implement AppHandler.addProduct,
-    ProductEndpoint.productPhotoAddEndpoint implement AppHandler.addProductPhoto
+    ProductEndpoint.productPhotoAddEndpoint implement AppHandler.addProductPhoto,
+    ProductEndpoint.getCartEndpoint         implement AppHandler.getPersonCart,
+    ProductEndpoint.addCartEndpoint         implement AppHandler.addToCart,
+    ProductEndpoint.deleteCartEndpoint      implement AppHandler.deleteFromCart
   )
 
   val personImpl = List(

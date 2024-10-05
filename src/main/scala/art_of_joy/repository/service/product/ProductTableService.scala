@@ -16,7 +16,7 @@ class ProductTableService extends ProductTable {
   import ctx._
   override def getProduct(id: Long): ZIO[DataSource, DomainError, List[ProductRow]] = 
     ctx.run(productSchema.filter(_.id == lift(id)))
-      .mapError(ex => DataBaseError(exception = ex))
+      .mapError(ex => DataBaseError())
 
   override def getProductList(filters: ProductClientFilter): ZIO[DataSource, DomainError, List[ProductRow]] = ctx.run(
     dynamicQuerySchema[ProductRow](
@@ -33,7 +33,7 @@ class ProductTableService extends ProductTable {
       .filterOpt(filters.subCategoryID.map(List(_)))((product, subCategory) => quote(subCategory.contains(product.subcategoryId)))
       .filterOpt(filters.maxPrice)((product, maxPrice) => quote(product.price <= maxPrice))
       .filterOpt(filters.minPrice)((product, minPrice) => quote(product.price >= minPrice))
-  ).mapError(ex => DataBaseError(exception = ex))
+  ).mapError(ex => DataBaseError())
 
   override def addProduct(product: ProductAdd): ZIO[DataSource, DomainError, Long] =
     ctx.run(
@@ -63,27 +63,27 @@ class ProductTableService extends ProductTable {
           setOpt(_.size.getOrElse(""), product.size),
           setOpt(_.ruSize.getOrElse(""), product.ruSize)
         )
-    ).mapError(ex => DataBaseError(exception = ex))
+    ).mapError(ex => DataBaseError())
 
   override def addPhoto(productId: Long, binaryData: Array[Byte]): ZIO[DataSource, DomainError, Long] =
     ctx.run(
       productImageSchema.insert(_.productId -> lift(productId), _.binaryData -> lift(binaryData))
-    ).mapError(ex => DataBaseError(exception = ex))
+    ).mapError(ex => DataBaseError())
 
   override def addToCart(productId:Long, personId:Long):ZIO[DataSource, DomainError, Long] =
     ctx.run(
-      cartSchema.insert(_.productId -> lift(productId), _.personId -> lift(personId))
-    ).mapError(ex => DataBaseError(exception = ex))
+      cartSchema.insert(_.productId -> lift(productId), _.personId -> lift(personId)).returning(_.id)
+    ).mapError(ex => DataBaseError())
 
   override def getPersonCart(personId: Long): ZIO[DataSource, DomainError, List[CartRow]] =
     ctx.run(
       cartSchema.filter(_.personId == lift(personId))
-    ).mapError(ex => DataBaseError(exception = ex))
+    ).mapError(ex => DataBaseError())
 
   override def deleteProductFromCart(personId:Long, productId:Long) =
     ctx.run(
-      cartSchema.filter(p => p.personId == lift(personId) && p.productId == lift(productId)).delete
-    ).mapError(ex => DataBaseError(exception = ex))
+      cartSchema.filter(p => p.personId == lift(personId) && p.productId == lift(productId)).delete.returning(_.id)
+    ).mapError(ex => DataBaseError())
 }
 object ProductTableService{
   val live = ZLayer.succeed(ProductTableService())

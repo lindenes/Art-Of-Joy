@@ -25,7 +25,7 @@ class SessionStorageService(ref:Ref[Map[String, StoragePerson]]) extends Session
   override def updateTime(key: String): ZIO[Scope, DomainError, Unit] =
     for {
       storagePerson <- get(key)
-      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError(exception = new Exception("Not found user in storage")))
+      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError())
       updatedUser <- ZIO.succeed(user.copy(lastVisitTime = new Date().getTime))
       storage <- ref.update(_.updated(key, updatedUser))
     } yield storage
@@ -43,7 +43,7 @@ class SessionStorageService(ref:Ref[Map[String, StoragePerson]]) extends Session
   override def setAcceptCode(key: String, code: String): ZIO[Scope, DomainError, Unit] =
     for {
       storagePerson <- get(key)
-      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError(exception = new Exception("Not found user in storage")))
+      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError())
       updatedPerson <- ZIO.succeed(user.copy(acceptCode = code))
       storage <- ref.update(_.updated(key, updatedPerson))
     } yield storage
@@ -51,7 +51,7 @@ class SessionStorageService(ref:Ref[Map[String, StoragePerson]]) extends Session
   override def clearAcceptCode(key: String): ZIO[Scope, DomainError, Unit] =
     for {
       storagePerson <- get(key)
-      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError(exception = new Exception("Not found user in storage")))
+      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError())
       updatedPerson <- ZIO.succeed(user.copy(acceptCode = ""))
       storage <- ref.update(_.updated(key, updatedPerson))
     } yield storage
@@ -59,7 +59,7 @@ class SessionStorageService(ref:Ref[Map[String, StoragePerson]]) extends Session
   override def updatePerson(key: String, person: Person): ZIO[Scope, DomainError, Unit] =
     for {
       storagePerson <- get(key)
-      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError(exception = new Exception("Not found user in storage")))
+      user <- ZIO.fromOption(storagePerson).mapError(_ => StorageError())
       updatedPerson <- ZIO.succeed(user.copy(person = person))
       storage <- ref.update(_.updated(key, updatedPerson))
     } yield storage

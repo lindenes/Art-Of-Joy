@@ -49,8 +49,7 @@ object PersonService {
       isEmailBusy <- PersonTable.getPersonByEmail(email).map(_.headOption.nonEmpty)
       result <- ZIO.ifZIO(ZIO.succeed(isEmailBusy))(
         onTrue = ZIO.fail(ValidationError(
-          getRegistrationError(true, emailValid, !isEmailBusy, true),
-          new Exception("validation fail")
+          getRegistrationError(true, emailValid, !isEmailBusy, true)
         )),
         onFalse =
           for {
@@ -84,7 +83,7 @@ object PersonService {
         if (validationError.isEmpty)
           PersonTable.setPersonData(personId, Option(passToHash(newPassword)))
         else
-          ZIO.fail(ValidationError(validationError, new Exception("validation fail")))
+          ZIO.fail(ValidationError(validationError))
     } yield result
   
 
@@ -104,10 +103,10 @@ object PersonService {
         if (validationError.isEmpty)
           PersonTable.setPersonData(personId, Option(newPassHash))
         else
-          ZIO.fail(ValidationError(validationError, new Exception("validation fail")))
+          ZIO.fail(ValidationError(validationError))
       result <- 
         if updatedData == 1 then ZIO.succeed(updatedData)
-        else ZIO.fail(NotFoundError(exception = new Exception("not found data in database")))
+        else ZIO.fail(NotFoundError())
     } yield result
 
   def setPersonInfo(id: Long, surname: String, firstname: String, middleName: Option[String]): ZIO[DataSource & PersonTable, DomainError, Long] =
@@ -115,7 +114,7 @@ object PersonService {
       updatedData <- PersonTable.setPersonData(id, None, Option(surname), Option(firstname), middleName)
       result <-
         if updatedData == 1 then ZIO.succeed(updatedData)
-        else ZIO.fail(NotFoundError(exception = new Exception("not found data in database")))
+        else ZIO.fail(NotFoundError())
     }yield result
     
   def addPerson(person:Person) = 

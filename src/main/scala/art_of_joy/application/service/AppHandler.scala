@@ -45,7 +45,7 @@ object AppHandler {
             ))
       } yield users
     ).mapError{
-      case error:DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+      case error:DataBaseError => HttpDatabaseError(applicationMessage = error.message)
       case _ => HttpError(applicationMessage = "unknown error")
     }
 
@@ -67,8 +67,8 @@ object AppHandler {
         case error:ValidationError => HttpValidationError(
           error.errorList.map(i => HttpValidationFields(i.fieldName, i.message))
         )
-        case error:StorageError => HttpError(error.message, error.exception.getMessage)
-        case error:DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+        case error:StorageError => HttpError(error.message, error.message)
+        case error:DataBaseError => HttpDatabaseError(applicationMessage = error.message)
         case er:HttpError => er
         case _ => HttpError(applicationMessage = "unknown error")
       }
@@ -124,7 +124,7 @@ object AppHandler {
                 user.person.isConfirmEmail, user.person.isConfirmPhone
             )), token, "Token")
     ).mapError{
-      case error:DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+      case error:DataBaseError => HttpDatabaseError(applicationMessage = error.message)
       case er:HttpValidationError => er
       case er: HttpError => er
       case _ => HttpError(applicationMessage = "unknown error")
@@ -174,8 +174,8 @@ object AppHandler {
       } yield response
     )
       .mapError{
-      case error:StorageError => HttpError(error.message, error.exception.getMessage)
-      case error:DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+      case error:StorageError => HttpError(error.message, error.message)
+      case error:DataBaseError => HttpDatabaseError(applicationMessage = error.message)
       case er:HttpError => er
       case er:Throwable => HttpError(applicationMessage = er.getMessage)
       case _ => HttpError(applicationMessage = "unknown error")
@@ -200,9 +200,9 @@ object AppHandler {
           )
       } yield ()
     ).mapError{
-      case error: StorageError => HttpError(error.message, error.exception.getMessage)
-      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
-      case error: NotFoundError => HttpNotFoundUser(applicationMessage = error.exception.getMessage)
+      case error: StorageError => HttpError(error.message, error.message)
+      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
+      case error: NotFoundError => HttpNotFoundUser(applicationMessage = error.message)
       case er: HttpError => er
       case _ => HttpError(applicationMessage = "unknown error")
     }
@@ -220,9 +220,9 @@ object AppHandler {
         )
       } yield ()
     ).mapError{
-      case error: StorageError => HttpError(error.message, error.exception.getMessage)
-      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
-      case error: NotFoundError => HttpNotFoundUser(applicationMessage = error.exception.getMessage)
+      case error: StorageError => HttpError(error.message, error.message)
+      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
+      case error: NotFoundError => HttpNotFoundUser(applicationMessage = error.message)
       case er: HttpError => er
       case _ => HttpError(applicationMessage = "unknown error")
     }
@@ -244,8 +244,8 @@ object AppHandler {
             )
       } yield response
     ).mapError{
-      case error: StorageError => HttpError(error.message, error.exception.getMessage)
-      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+      case error: StorageError => HttpError(error.message, error.message)
+      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
       case _ => HttpError(applicationMessage = "unknown error")
     }
 
@@ -260,8 +260,8 @@ object AppHandler {
         )
       )
       .mapError{
-        case error: StorageError => HttpError(error.message, error.exception.getMessage)
-        case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+        case error: StorageError => HttpError(error.message, error.message)
+        case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
         case _ => HttpError(applicationMessage = "unknown error")
       }
 
@@ -269,8 +269,8 @@ object AppHandler {
     CategoryTable.getBrands
       .map(_.map(b => BrandHttp(b.id, b.name)))
       .mapError{
-        case error: StorageError => HttpError(error.message, error.exception.getMessage)
-        case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+        case error: StorageError => HttpError(error.message, error.message)
+        case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
         case _ => HttpError(applicationMessage = "unknown error")
       }
   
@@ -278,15 +278,15 @@ object AppHandler {
     CategoryTable.addBrand(inData.name)
       .map(b => BrandHttp(b.id, b.name))
       .mapError {
-        case error: StorageError => HttpError(error.message, error.exception.getMessage)
-        case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+        case error: StorageError => HttpError(error.message, error.message)
+        case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
         case _ => HttpError(applicationMessage = "unknown error")
       }
 
   def parseExel(exel:ExelBase64) =
     ExelOperation.getProductFromExel(Base64.getDecoder.decode(exel.exelData))
       .mapError{
-        case er:LoadImageError => HttpExelLoadError(applicationMessage = er.exception.getMessage)
+        case er:LoadImageError => HttpExelLoadError(applicationMessage = er.message)
         case _ => HttpError(applicationMessage = "unknown error")
       }
 
@@ -299,7 +299,7 @@ object AppHandler {
           productRow.width, productRow.size, productRow.ruSize)
       ))
       .mapError{
-        case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+        case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
         case _ => HttpError(applicationMessage = "unknown error")
       }
   
@@ -310,11 +310,10 @@ object AppHandler {
         - <- ZIO.when(addedRows == 0)(ZIO.fail(HttpAddPhotoError(applicationMessage = "added rows = 0")))
       }yield ()
     ).mapError{
-      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
       case error: ApplicationError => error
       case _ => HttpError(applicationMessage = "unknown error")
     }
-    
   
   def addProductPhoto(productPhoto:ProductPhotoAdd) =
     (
@@ -323,9 +322,35 @@ object AppHandler {
         - <- ZIO.when(addedRows == 0)(ZIO.fail(HttpAddPhotoError(applicationMessage = "added rows = 0")))
       }yield ()
     ).mapError{
-      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.exception.getMessage)
+      case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
       case error:ApplicationError => error
-      case _ => HttpError(applicationMessage = "unknown error")
+      case error:DomainError => HttpError(applicationMessage = error.message)
     }
       
+  def getPersonCart(token:String) = 
+    ProductService.getPersonCart(token)
+      .mapBoth(
+        {
+          case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
+          case error: DomainError => HttpError(applicationMessage = error.message)
+        },
+        productList =>
+          productList.distinct.map(p =>
+            CartProductHttp(p.id, p.productName, p.productId, p.count, p.price)
+          )
+      )
+  
+  def addToCart(token:String, data:AddToCart) =
+    ProductService.addToCart(data.productId, token)
+      .mapError{
+        case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
+        case error: DomainError => HttpError(applicationMessage = error.message)
+      }
+  
+  def deleteFromCart(token:String, data:DeleteFromCart) =
+    ProductService.deleteFromCart(token, data.id)
+      .mapError {
+        case error: DataBaseError => HttpDatabaseError(applicationMessage = error.message)
+        case error: DomainError => HttpError(applicationMessage = error.message)
+      }
 }

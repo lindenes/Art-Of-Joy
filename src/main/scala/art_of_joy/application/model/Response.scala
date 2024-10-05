@@ -91,4 +91,16 @@ object Response {
     implicit val schema: Schema[ExelProduct] = DeriveSchema.gen
   }
   
+  case class CartProductHttp(
+                            id:Long,
+                            productName:String,
+                            productId:Long,
+                            count:Int,
+                            price:Double
+                            )
+
+  object CartProductHttp {
+    implicit val schema: Schema[CartProductHttp] = DeriveSchema.gen
+  }
+  
 }

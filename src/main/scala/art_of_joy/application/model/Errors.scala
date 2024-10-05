@@ -53,8 +53,7 @@ object Errors {
                              ) extends ApplicationError
 
   object HttpExelLoadError {
-    implicit val decoder: JsonDecoder[HttpExelLoadError] = DeriveJsonDecoder.gen[HttpExelLoadError]
-    implicit val encoder: JsonEncoder[HttpExelLoadError] = DeriveJsonEncoder.gen[HttpExelLoadError]
+    implicit val schema: Schema[HttpExelLoadError] = DeriveSchema.gen
   }
   
   case class HttpAddPhotoError(
@@ -62,9 +61,8 @@ object Errors {
                             applicationMessage: String
                           ) extends ApplicationError
 
-  object AddPhotoError {
-    implicit val decoder: JsonDecoder[HttpAddPhotoError] = DeriveJsonDecoder.gen[HttpAddPhotoError]
-    implicit val encoder: JsonEncoder[HttpAddPhotoError] = DeriveJsonEncoder.gen[HttpAddPhotoError]
+  object HttpAddPhotoError {
+    implicit val schema: Schema[HttpAddPhotoError] = DeriveSchema.gen
   }
   
 }

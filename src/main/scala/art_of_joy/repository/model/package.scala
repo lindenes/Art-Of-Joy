@@ -45,5 +45,5 @@ package object model {
   
   case class ProductImageRow(id:Long, binaryData:Array[Byte], productId:Long)
 
-  case class CartRow(id:Long, productId:Long, personId:Long)
+  case class CartRow(id:Long, productId:Long, personId:Long, count:Int)
 }

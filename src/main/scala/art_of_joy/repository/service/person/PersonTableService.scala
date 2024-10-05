@@ -16,17 +16,17 @@ class PersonTableService extends PersonTable {
   override def getPersonByEmail(email: String): ZIO[DataSource, DomainError, List[PersonRow]] =
     ctx.run(
       personSchema.filter(_.email == lift(email))
-    ).mapError(ex => DataBaseError(exception = ex.getCause))
+    ).mapError(ex => DataBaseError())
 
   override def getPersonByPhone(number: String): ZIO[DataSource, DomainError, List[PersonRow]] =
     ctx.run(
       personSchema.filter(_.phone == lift(Option(number)))
-    ).mapError(ex => DataBaseError(exception = ex.getCause))
+    ).mapError(ex => DataBaseError())
 
   override def getPersonById(personId: Long): ZIO[DataSource, DomainError, List[PersonRow]] =
     ctx.run(
       personSchema.filter(_.id == lift(personId))
-    ).mapError(ex => DataBaseError(exception = ex.getCause))
+    ).mapError(ex => DataBaseError())
 
   override def addPerson(person: Person): ZIO[DataSource, DomainError, PersonRow] = 
   ctx.run(
@@ -39,7 +39,7 @@ class PersonTableService extends PersonTable {
         _.isConfirmPhone -> false
       ).returning(p => p)
     }
-  ).mapError(ex => DataBaseError(exception = ex.getCause))
+  ).mapError(ex => DataBaseError())
 
   override def getAllPersons(startRow: Int, endRow: Option[Int]): ZIO[DataSource, DomainError, List[PersonRow]] =
     (
@@ -58,7 +58,7 @@ class PersonTableService extends PersonTable {
             personSchema
           }
         )
-    ).mapError(ex => DataBaseError(exception = ex.getCause))
+    ).mapError(ex => DataBaseError())
       
   def setPersonData(id:Long, passwordHash:Option[String], surname:Option[String], firstname:Option[String], middleName:Option[String]): ZIO[DataSource, DomainError, Long] = ctx.run(
     dynamicQuerySchema[PersonRow](
@@ -76,7 +76,7 @@ class PersonTableService extends PersonTable {
         setOpt[PersonRow,String](p => quote(p.surname.getOrElse("")), surname),
         setOpt[PersonRow,String](p => quote(p.middleName.getOrElse("")), middleName)
       )
-  ).mapError(ex => DataBaseError(exception = ex.getCause))
+  ).mapError(ex => DataBaseError())
   
 }
 object PersonTableService{

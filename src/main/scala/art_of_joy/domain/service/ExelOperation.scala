@@ -54,7 +54,7 @@ object ExelOperation {
             )
           }
         ).toList
-    ).mapError(ex => LoadExelDataError(exception = ex))
+    ).mapError(ex => LoadExelDataError(ex.getMessage))
   }
   
 }
