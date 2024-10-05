@@ -25,13 +25,13 @@ package object application {
     OpenAPIGen.fromEndpoints(
       title = "Kaban_Zdorova",
       version = "1.0",
-      CategoryEndpoint.endpointList ::: PersonEndpoint.endpointList ::: PersonEndpoint.endpointList
+      CategoryEndpoint.endpointList ::: PersonEndpoint.endpointList ::: ProductEndpoint.endpointList
     )
   )
 
   def getRoutes = 
     Routes.fromIterable(
-      RouteImpl.categoryImpl ::: RouteImpl.productImpl
+      RouteImpl.categoryImpl ::: RouteImpl.productImpl ::: RouteImpl.personImpl
     ) ++ swaggerRoutes
 
 }
