@@ -75,9 +75,9 @@ class ProductTableService extends ProductTable {
       cartSchema.insert(_.productId -> lift(productId), _.personId -> lift(personId)).returning(_.id)
     ).mapError(ex => DataBaseError())
 
-  override def getPersonCart(personId: Long): ZIO[DataSource, DomainError, List[CartRow]] =
+  override def getPersonCart(personId: Long): ZIO[DataSource, DomainError, List[(CartRow, ProductRow)]] =
     ctx.run(
-      cartSchema.filter(_.personId == lift(personId))
+      cartSchema.filter(_.personId == lift(personId)).join(query[ProductRow]).on(_.productId == _.id)
     ).mapError(ex => DataBaseError())
 
   override def deleteProductFromCart(personId:Long, productId:Long) =

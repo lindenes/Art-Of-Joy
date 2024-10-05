@@ -20,15 +20,8 @@ object ProductService {
   def getPersonCart(token:String) = for{
     storagePerson <- SessionStorage.get(token)
     openStoragePerson <- ZIO.fromOption(storagePerson).orElseFail(StorageError())
-    cart <- ProductTable.getPersonCart(openStoragePerson.person.id)
-    cartProductInfo <-
-      ZIO.foreach(cart)(c => ProductTable.getProduct(c.productId)).map(_.flatten)
-  }yield
-    cartProductInfo.map(p =>{
-        val c = cart.find(_.productId == p.id).get
-        CartProduct(c.id, p.name, p.id, c.count, p.price * c.count)
-      }
-    )
+    cartProduct <- ProductTable.getPersonCart(openStoragePerson.person.id)
+  }yield cartProduct.map{case (cart, product) => CartProduct(cart.id, product.name, product.id, cart.count, cart.count * product.price)}
 
   def addToCart(productId:Long, token:String) = for{
     storagePerson <- SessionStorage.get(token)

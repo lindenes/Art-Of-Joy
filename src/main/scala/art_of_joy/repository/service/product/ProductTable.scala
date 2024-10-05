@@ -13,7 +13,7 @@ trait ProductTable {
   def addProduct(product:ProductAdd):ZIO[DataSource,DomainError, Long]
   def addPhoto(productId:Long, binaryData:Array[Byte]):ZIO[DataSource,DomainError, Long]
   def addToCart(productId:Long, personId:Long):ZIO[DataSource, DomainError, Long]
-  def getPersonCart(personId:Long):ZIO[DataSource, DomainError, List[CartRow]]
+  def getPersonCart(personId:Long):ZIO[DataSource, DomainError, List[(CartRow, ProductRow)]]
   def deleteProductFromCart(personId:Long, productId:Long):ZIO[DataSource, DomainError, Long]
 }
 object ProductTable{
