@@ -5,8 +5,8 @@ import zio.http.codec.PathCodec.*
 import art_of_joy.application.http.*
 import art_of_joy.application.service.RouteImpl
 import zio.http.Header.{AccessControlAllowOrigin, Origin}
-import zio.http.Middleware.CorsConfig
-import zio.http.endpoint.openapi._
+import zio.http.Middleware.{CorsConfig, cors}
+import zio.http.endpoint.openapi.*
 
 package object application {
 
@@ -30,8 +30,10 @@ package object application {
   )
 
   def getRoutes = 
-    Routes.fromIterable(
-      RouteImpl.categoryImpl ::: RouteImpl.productImpl ::: RouteImpl.personImpl
-    ) ++ swaggerRoutes
+    (
+      Routes.fromIterable(
+        RouteImpl.categoryImpl ::: RouteImpl.productImpl ::: RouteImpl.personImpl
+      ) ++ swaggerRoutes
+    ) @@ cors(config)
 
 }
