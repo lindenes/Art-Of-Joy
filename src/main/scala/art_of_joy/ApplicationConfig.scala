@@ -11,7 +11,7 @@ import zio.http.netty.NettyConfig
 import java.net.InetSocketAddress
 object ApplicationConfig {
 
-  case class Api(host: String,threadSize:Int, port: Int, timeoutSec: Int, maxInitialLineLength:Int)
+  case class Api(host: String,threadSize:Int, port: Int, timeoutSec: Int)
   case class SmtpConfig(host:String, port:String, username:String, password:String, auth:Boolean, startTls:Boolean, email:String)
   
   val httpConfig: ZLayer[Any, Config.Error, Server.Config] =
@@ -23,7 +23,6 @@ object ApplicationConfig {
           Server.Config.default
             .binding(config.host, config.port)
             .idleTimeout(config.timeoutSec.second)
-            .maxInitialLineLength(config.maxInitialLineLength)
         )
     )
     
