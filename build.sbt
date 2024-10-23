@@ -38,13 +38,22 @@ lazy val root = (project in file("."))
     mainClass := Some("art_of_joy.Main"),
     Compile / mainClass := Some("art_of_joy.Main"),
     libraryDependencies ++= Seq(
-      "io.getquill"          %% "quill-jdbc-zio" % "4.8.4",
-      "org.postgresql"       %  "postgresql"     % "42.7.3",
-      "org.slf4j"            % "slf4j-api"       % "2.0.12",
-      "ch.qos.logback"       % "logback-classic" % "1.5.6",
-      "javax.mail"           % "javax.mail-api"  %  mail,
-      "com.sun.mail"         % "javax.mail"      %  mail,
-      "org.apache.poi"       % "poi"             %  exel,
-      "org.apache.poi"       % "poi-ooxml"       %  exel
-    ) ++ zioLib
+      "io.getquill"     %% "quill-jdbc-zio"                 % "4.8.4",
+      "org.postgresql"  %  "postgresql"                     % "42.7.3",
+      "org.slf4j"       % "slf4j-api"                       % "2.0.12",
+      "ch.qos.logback"  % "logback-classic"                 % "1.5.6",
+      "javax.mail"      % "javax.mail-api"                  %  mail,
+      "com.sun.mail"    % "javax.mail"                      %  mail,
+      "org.apache.poi"  % "poi"                             %  exel,
+      "org.apache.poi"  % "poi-ooxml"                       %  exel,
+      //"com.dimafeng"   %% "testcontainers-scala-scalatest"  % "0.41.2" % Test,
+      //"com.dimafeng"   %% "testcontainers-scala-postgresql" % "0.41.2" % Test,
+      "org.testcontainers" % "testcontainers"               % "1.20.3" % Test,
+      "org.testcontainers" % "postgresql"                   % "1.20.3" % Test,
+      "dev.zio"        %% "zio-test"                        % "2.1.11" % Test,
+      "dev.zio"        %% "zio-test-sbt"                    % "2.1.11" % Test,
+      "dev.zio"        %% "zio-test-magnolia"               % "2.1.11" % Test,
+      "dev.zio" %% "zio-http-testkit" % "3.0.1" % Test
+    ) ++ zioLib,
+     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
   )
