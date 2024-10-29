@@ -53,7 +53,7 @@ lazy val root = (project in file("."))
       "dev.zio"        %% "zio-test"                        % "2.1.11" % Test,
       "dev.zio"        %% "zio-test-sbt"                    % "2.1.11" % Test,
       "dev.zio"        %% "zio-test-magnolia"               % "2.1.11" % Test,
-      "dev.zio" %% "zio-http-testkit" % "3.0.1" % Test
+      "dev.zio"        %% "zio-http-testkit"                % "3.0.1" % Test
     ) ++ zioLib,
      testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
   )
