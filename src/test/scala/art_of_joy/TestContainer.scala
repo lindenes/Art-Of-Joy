@@ -9,8 +9,6 @@ import art_of_joy.repository.service.category.CategoryTableService
 import art_of_joy.repository.service.person.PersonTableService
 import art_of_joy.repository.service.product.ProductTableService
 import art_of_joy.utils.Migration
-import com.typesafe.config.Config
-import io.getquill.jdbczio.Quill.DataSource
 import org.postgresql.ds.PGSimpleDataSource
 import zio.*
 import zio.http.*
@@ -21,7 +19,6 @@ import zio.test.TestAspect.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
-import java.util
 import javax.sql.DataSource
 object TestContainer extends ZIOSpecDefault{
 

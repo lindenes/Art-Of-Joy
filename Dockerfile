@@ -1,7 +1,5 @@
-# Используем базовый образ OpenJDK 17
-FROM openjdk:17-jdk-slim
+FROM docker.io/openjdk:17-jdk-slim AS build
 
-# Установка SBT
 RUN apt-get update && \
     apt-get install -y curl && \
     apt-get install -y gnupg && \
@@ -14,5 +12,7 @@ WORKDIR /usr/src/art-of-joy
 COPY . .
 RUN sbt compile
 RUN sbt assembly
-EXPOSE 9001
-CMD ["java", "-jar", "target/scala-3.5.1/ArtOfJoy.jar" ]
+
+FROM docker.io/gcr.io/distroless/java17-debian12
+COPY --from=build /usr/src/art-of-joy/target/scala-3.5.1/ArtOfJoy.jar ArtOfJoy.jar
+CMD ["ArtOfJoy.jar" ]
